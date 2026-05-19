@@ -351,9 +351,18 @@
     const SUPABASE_ANON_KEY = "sb_publishable_k_u54EP-ZibEk5ABR2_lQA__c41LUZI";
 
     const supabaseClient = window.supabaseClient.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
+      var allData = [];
+      var currentRegion = "";
+      var supabaseClient = null;
+
+      if (window.supabase && window.supabase.createClient) {
+        supabaseClient = window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_ANON_KEY
+        );
+      } else {
+        console.error("Supabase CDN 載入失敗，請確認 <script src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'></script> 是否存在");
+      }
 
     const REGION_LIST = ["北北基", "桃竹苗", "中彰投", "雲嘉南", "高屏", "宜花東"];
 
@@ -418,6 +427,10 @@
     }
 
     async function loadDataFromServer(callback) {
+     if (!supabaseClient) {
+      showError("Supabase 尚未成功連線，請檢查 CDN、URL、anon key。");
+      return;
+     }
       try {
         const { data, error } = await supabase
           .from("noise_reports")
