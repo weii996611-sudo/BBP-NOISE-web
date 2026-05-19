@@ -347,10 +347,10 @@
       - Project URL
       - anon public key
     */
-    const SUPABASE_URL = "https://sadnhsddereuhpfvdquk.supabase.co";
+    const SUPABASE_URL = "https://sadnhsddereuhpfvdquk.supabaseClient.co";
     const SUPABASE_ANON_KEY = "sb_publishable_k_u54EP-ZibEk5ABR2_lQA__c41LUZI";
 
-    const supabase = window.supabase.createClient(
+    const supabaseClient = window.supabaseClient.createClient(
       SUPABASE_URL,
       SUPABASE_ANON_KEY
     );
@@ -666,7 +666,7 @@
       buttonObj.textContent = "⏳ 處理中...";
 
       try {
-        const { data, error } = await supabase.rpc("report_noise_withdraw", {
+        const { data, error } = await supabaseClient.rpc("report_noise_withdraw", {
           p_report_id: reportId,
           p_device_id: deviceId
         });
