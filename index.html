@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BBPATROL 黑箱糾察隊</title>
+    <style>
+      /* 🌌 全域樣式 */
+      body {
+        background-color: #050505; 
+        color: #FFFFFF;           
+        font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      #header {
+        background-color: #050505;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #1a1a1a;
+        flex-shrink: 0;
+      }
+      .brand-title { margin: 0; font-size: 1.2rem; font-weight: bold; letter-spacing: 1px; }
+      .brand-subtitle { color: #33FFCC; font-size: 0.7rem; text-transform: uppercase; }
+      
+      .back-btn, .refresh-btn {
+        background-color: transparent;
+        color: #33FFCC;
+        border: 1px solid #33FFCC;
+        border-radius: 15px;
+        padding: 5px 12px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        display: none;
+      }
+      .back-btn:active, .refresh-btn:active { background-color: rgba(51, 255, 204, 0.2); }
+
+      #main-wrapper { flex: 1; position: relative; width: 100%; }
+
+      #menu-screen {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        padding: 25px;
+        height: 100%;
+        box-sizing: border-box;
+        align-content: center;
+      }
+      .region-btn {
+        background-color: #000000;
+        border: 1px solid #33FFCC;
+        border-radius: 15px;
+        color: #FFFFFF;
+        padding: 25px 10px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+        box-shadow: 0 0 10px rgba(51, 255, 204, 0.1);
+      }
+      .region-btn:active { background-color: #33FFCC; color: #000000; }
+
+      #data-screen {
+        display: none; 
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        height: 100%;
+        padding: 0 20px;
+        gap: 20px;
+        -webkit-overflow-scrolling: touch;
+      }
+      #data-screen::-webkit-scrollbar { display: none; }
+
+      /* 📱 9:16 黑箱字卡與漸隱動畫控制 */
+      .bb-card {
+        background-color: #000000; 
+        border: 1.5px solid #33FFCC; 
+        border-radius: 25px;
+        width: 75vw;
+        max-width: 320px;
+        flex-shrink: 0;
+        scroll-snap-align: center;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-sizing: border-box;
+        transition: opacity 0.5s ease, transform 0.5s ease, width 0.5s ease, padding 0.5s ease, margin 0.5s ease;
+      }
+      /* 🌟 當觸發消失時的樣式 */
+      .bb-card.fade-out {
+        opacity: 0;
+        transform: scale(0.7);
+        width: 0px;
+        padding: 0px;
+        margin: 0px;
+        border: 0px solid transparent;
+        overflow: hidden;
+      }
+
+      .bb-title { font-size: 1.2rem; color: #33FFCC; margin-bottom: 12px; font-weight: bold; }
+      
+      .image-container {
+        width: 100%;
+        aspect-ratio: 9 / 16;
+        border-radius: 15px;
+        overflow: hidden;
+        margin-bottom: 15px;
+        background-color: #050505;
+        border: 1px solid #1a1a1a;
+      }
+      .image-container img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .bb-body { font-size: 0.95rem; line-height: 1.5; text-align: center; color: #FFFFFF; margin-bottom: 15px; }
+
+      /* 控制按鈕區排版 ⚙️ */
+      .card-control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+        align-items: center;
+      }
+
+      .share-card-btn, .remove-card-btn {
+        background-color: #1a1a1a;
+        border-radius: 20px;
+        padding: 6px 15px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 85%;
+        text-align: center;
+        box-sizing: border-box;
+      }
+      .share-card-btn { color: #33FFCC; border: 1px solid #33FFCC; }
+      .share-card-btn:active { background-color: #33FFCC; color: #000000; }
+
+      /* 🛑 通報已撤走按鈕樣式 */
+      .remove-card-btn { color: #FF4444; border: 1px solid #FF4444; }
+      .remove-card-btn:active { background-color: #FF4444; color: #FFFFFF; }
+
+      #no-data {
+        width: 100%; text-align: center; color: #444444; 
+        font-size: 1rem; position: absolute; top: 50%; transform: translateY(-50%);
+      }
+    </style>
+  </head>
+  <body>
+
+    <header id="header">
+      <div class="brand-group">
+        <div class="brand-title">BBPATROL</div>
+        <div class="brand-subtitle">Black Box System</div>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="back-btn" id="back-btn" onclick="showMenu()">⬅ 返回區域</button>
+        <button class="refresh-btn" id="refresh-btn" onclick="refreshCurrentRegion()">🔄 刷新資料</button>
+      </div>
+    </header>
+
+    <div id="main-wrapper">
+      <div id="menu-screen">
+        <div class="region-btn" onclick="filterData('北北基')">北北基</div>
+        <div class="region-btn" onclick="filterData('桃竹苗')">桃竹苗</div>
+        <div class="region-btn" onclick="filterData('中彰投')">中彰投</div>
+        <div class="region-btn" onclick="filterData('雲嘉南')">雲嘉南</div>
+        <div class="region-btn" onclick="filterData('高屏')">高屏</div>
+        <div class="region-btn" onclick="filterData('宜花東')">宜花東</div>
+      </div>
+
+      <div id="data-screen"></div>
+      <div id="no-data" style="display: none;">該區域暫無糾察紀錄</div>
+    </div>
+
+    <script>
+      var allData = [];       
+      var currentRegion = ""; 
+
+      window.onload = function() {
+        loadDataFromServer();
+      };
+
+      function loadDataFromServer(callback) {
+        google.script.run
+          .withSuccessHandler(function(data) {
+            allData = data;
+            if (callback) callback(); 
+          })
+          .getLatestDataList();
+      }
+
+      function filterData(regionName) {
+        currentRegion = regionName; 
+        var dataScreen = document.getElementById('data-screen');
+        var noData = document.getElementById('no-data');
+        dataScreen.innerHTML = ""; 
+        
+        var filtered = allData.filter(function(item) {
+          return item.region.toString().trim() === regionName;
+        });
+
+        if (filtered.length > 0) {
+          filtered.forEach(function(item, index) {
+            var cardNumber = index + 1;
+            var cardHtml = '<div class="bb-card" id="card-box-' + item.rowIndex + '">';
+            cardHtml += '  <div class="bb-title">糾察紀錄 #' + cardNumber + '</div>';
+            if (item.imageUrl && item.imageUrl.toString().trim() !== "") {
+              cardHtml += '  <div class="image-container"><img src="' + item.imageUrl + '"></div>';
+            }
+            cardHtml += '  <div class="bb-body"><p>' + item.text + '</p></div>';
+            
+            // 🛠️ 按鈕控制群組
+            cardHtml += '  <div class="card-control-group">';
+            cardHtml += '    <button class="share-card-btn" onclick="shareCard(this, \'' + regionName + '\', ' + cardNumber + ')">🔗 分享此紀錄</button>';
+            // 🌟 塞入通報已撤走按鈕，直接帶入該筆資料的試算表真實列號 (rowIndex)
+            cardHtml += '    <button class="remove-card-btn" onclick="reportWithdraw(this, ' + item.rowIndex + ')">🛑 通報已撤走</button>';
+            cardHtml += '  </div>';
+            
+            cardHtml += '</div>';
+            dataScreen.innerHTML += cardHtml;
+          });
+          dataScreen.style.display = "flex";
+          noData.style.display = "none";
+        } else {
+          dataScreen.style.display = "none";
+          noData.style.display = "block";
+        }
+
+        document.getElementById('menu-screen').style.display = "none";
+        document.getElementById('back-btn').style.display = "block";
+        document.getElementById('refresh-btn').style.display = "block";
+      }
+
+      function showMenu() {
+        document.getElementById('menu-screen').style.display = "grid";
+        document.getElementById('data-screen').style.display = "none";
+        document.getElementById('no-data').style.display = "none";
+        document.getElementById('back-btn').style.display = "none";
+        document.getElementById('refresh-btn').style.display = "none";
+      }
+
+      function refreshCurrentRegion() {
+        var dataScreen = document.getElementById('data-screen');
+        document.getElementById('no-data').style.display = "none";
+        dataScreen.innerHTML = '<p style="width:100%; text-align:center; color:#444444; font-size:1rem;">數據即時同步中...</p>';
+        
+        loadDataFromServer(function() {
+          filterData(currentRegion);
+        });
+      }
+
+      function shareCard(buttonObj, region, cardNum) {
+        var baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+        var shareUrl = baseUrl + '?region=' + encodeURIComponent(region) + '&card=' + cardNum;
+
+        navigator.clipboard.writeText(shareUrl).then(function() {
+          buttonObj.innerText = "✅ 已複製到剪貼簿";
+          buttonObj.style.borderColor = "#33FFCC";
+          buttonObj.style.color = "#000000";
+          buttonObj.style.backgroundColor = "#33FFCC";
+          setTimeout(function() {
+            buttonObj.innerText = "🔗 分享此紀錄";
+            buttonObj.style.borderColor = "#33FFCC";
+            buttonObj.style.color = "#33FFCC";
+            buttonObj.style.backgroundColor = "#1a1a1a";
+          }, 2000);
+        });
+      }
+
+      // 🛑 處理通報並即時鎖定按鈕
+      function reportWithdraw(buttonObj, rowIndex) {
+        // 點擊瞬間立刻將按鈕反灰 🔒
+        buttonObj.disabled = true;
+        buttonObj.innerText = "⏳ 處理中...";
+
+        google.script.run
+          // 🟢 成功接到後端回傳的球
+          .withSuccessHandler(function(result) {
+            
+            if (result.status === "deleted" || result.status === "updated") {
+              var reportedList = getLocalReportedCards();
+              if (!reportedList.includes(rowIndex.toString())) {
+                reportedList.push(rowIndex.toString());
+                localStorage.setItem('reported_cards', reportedList.join(','));
+              }
+            }
+
+            if (result.status === "deleted") {
+              buttonObj.innerText = "✅ 達標！資料移除中";
+              setTimeout(function() {
+                var targetCardBox = document.getElementById('card-box-' + rowIndex);
+                if (targetCardBox) {
+                  targetCardBox.classList.add('fade-out'); 
+                  setTimeout(function() {
+                    loadDataFromServer(function() { filterData(currentRegion); });
+                  }, 500);
+                }
+              }, 1000);
+
+            // 🌟 依照你的需求，未滿 10 次時改變顯示文字
+            } else if (result.status === "updated") {
+              buttonObj.innerText = "✅ 已通報完成";
+              
+            } else {
+              // 順便把後端的錯誤訊息 (result.msg) 印出來，方便我們抓蟲 🐛
+              buttonObj.innerText = "❌ 系統錯誤: " + result.msg;
+              buttonObj.disabled = false;
+            }
+          })
+          // 🔴 失敗安全網：接住網路斷線或 Google 伺服器無回應的球
+          .withFailureHandler(function(error) {
+            buttonObj.innerText = "❌ 網路或伺服器無回應";
+            buttonObj.disabled = false;
+          })
+          .reportItemRemoved(rowIndex);
+      }
+    </script>
+  </body>
+</html>
