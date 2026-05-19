@@ -1,399 +1,761 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <head>
-    <base target="_top">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BBPATROL 黑箱糾察隊</title>
-    <style>
-      /* 🌌 全域樣式 */
-      body {
-        background-color: #050505; 
-        color: #FFFFFF;           
-        font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        overflow: hidden;
-      }
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>BBPATROL 黑箱糾察隊</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #050505;
+      color: #ffffff;
+      font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #header {
+      background-color: #050505;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1a1a1a;
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      line-height: 1.1;
+    }
+
+    .brand-subtitle {
+      color: #33ffcc;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      margin-top: 3px;
+      letter-spacing: 0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .back-btn,
+    .refresh-btn {
+      background-color: transparent;
+      color: #33ffcc;
+      border: 1px solid #33ffcc;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: none;
+      white-space: nowrap;
+    }
+
+    .back-btn:active,
+    .refresh-btn:active {
+      background-color: rgba(51, 255, 204, 0.2);
+    }
+
+    #main-wrapper {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      min-height: 0;
+    }
+
+    #menu-screen {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      padding: 25px;
+      height: 100%;
+      align-content: center;
+    }
+
+    .region-btn {
+      background-color: #000000;
+      border: 1px solid #33ffcc;
+      border-radius: 15px;
+      color: #ffffff;
+      padding: 25px 10px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(51, 255, 204, 0.1);
+      user-select: none;
+    }
+
+    .region-btn:active {
+      background-color: #33ffcc;
+      color: #000000;
+    }
+
+    #data-screen {
+      display: none;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      height: 100%;
+      padding: 20px;
+      gap: 20px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #data-screen::-webkit-scrollbar {
+      display: none;
+    }
+
+    .bb-card {
+      background-color: #000000;
+      border: 1.5px solid #33ffcc;
+      border-radius: 25px;
+      width: 75vw;
+      max-width: 330px;
+      min-width: 270px;
+      flex-shrink: 0;
+      scroll-snap-align: center;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition:
+        opacity 0.5s ease,
+        transform 0.5s ease,
+        width 0.5s ease,
+        padding 0.5s ease,
+        margin 0.5s ease;
+    }
+
+    .bb-card.fade-out {
+      opacity: 0;
+      transform: scale(0.7);
+      width: 0;
+      min-width: 0;
+      padding: 0;
+      margin: 0;
+      border: 0 solid transparent;
+      overflow: hidden;
+    }
+
+    .bb-title {
+      font-size: 1.25rem;
+      color: #33ffcc;
+      margin-bottom: 12px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .image-container {
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      background-color: #050505;
+      border: 1px solid #1a1a1a;
+    }
+
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .bb-body {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      text-align: center;
+      color: #ffffff;
+      margin-bottom: 15px;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    .bb-meta {
+      color: #777777;
+      font-size: 0.75rem;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .card-control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      align-items: center;
+    }
+
+    .share-card-btn,
+    .remove-card-btn {
+      background-color: #1a1a1a;
+      border-radius: 20px;
+      padding: 8px 15px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 88%;
+      text-align: center;
+      border: 1px solid transparent;
+      color: #ffffff;
+    }
+
+    .share-card-btn {
+      color: #33ffcc;
+      border-color: #33ffcc;
+    }
+
+    .share-card-btn:active {
+      background-color: #33ffcc;
+      color: #000000;
+    }
+
+    .remove-card-btn {
+      color: #ff4444;
+      border-color: #ff4444;
+    }
+
+    .remove-card-btn:active:not(:disabled) {
+      background-color: #ff4444;
+      color: #ffffff;
+    }
+
+    .remove-card-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    #no-data,
+    #loading-text {
+      width: 100%;
+      text-align: center;
+      color: #555555;
+      font-size: 1rem;
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      padding: 0 20px;
+    }
+
+    .error-text {
+      color: #ff5555 !important;
+    }
+
+    @media (max-width: 420px) {
       #header {
-        background-color: #050505;
-        padding: 15px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #1a1a1a;
-        flex-shrink: 0;
+        padding: 14px 16px;
       }
-      .brand-title { margin: 0; font-size: 1.2rem; font-weight: bold; letter-spacing: 1px; }
-      .brand-subtitle { color: #33FFCC; font-size: 0.7rem; text-transform: uppercase; }
-      
-      .back-btn, .refresh-btn {
-        background-color: transparent;
-        color: #33FFCC;
-        border: 1px solid #33FFCC;
-        border-radius: 15px;
-        padding: 5px 12px;
-        font-size: 0.8rem;
-        cursor: pointer;
-        display: none;
-      }
-      .back-btn:active, .refresh-btn:active { background-color: rgba(51, 255, 204, 0.2); }
 
-      #main-wrapper { flex: 1; position: relative; width: 100%; }
+      .brand-title {
+        font-size: 1.25rem;
+      }
+
+      .brand-subtitle {
+        font-size: 0.68rem;
+      }
+
+      .back-btn,
+      .refresh-btn {
+        padding: 6px 10px;
+        font-size: 0.78rem;
+      }
 
       #menu-screen {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        padding: 25px;
-        height: 100%;
-        box-sizing: border-box;
-        align-content: center;
+        padding: 22px;
+        gap: 14px;
       }
+
       .region-btn {
-        background-color: #000000;
-        border: 1px solid #33FFCC;
-        border-radius: 15px;
-        color: #FFFFFF;
-        padding: 25px 10px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.2s;
-        text-align: center;
-        box-shadow: 0 0 10px rgba(51, 255, 204, 0.1);
+        padding: 24px 8px;
+        font-size: 1.08rem;
       }
-      .region-btn:active { background-color: #33FFCC; color: #000000; }
 
       #data-screen {
-        display: none; 
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-start;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        height: 100%;
-        padding: 0 20px;
-        gap: 20px;
-        -webkit-overflow-scrolling: touch;
+        padding: 18px;
+        gap: 18px;
       }
-      #data-screen::-webkit-scrollbar { display: none; }
 
-      /* 📱 9:16 黑箱字卡與漸隱動畫控制 */
       .bb-card {
-        background-color: #000000; 
-        border: 1.5px solid #33FFCC; 
-        border-radius: 25px;
-        width: 75vw;
-        max-width: 320px;
-        flex-shrink: 0;
-        scroll-snap-align: center;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        box-sizing: border-box;
-        transition: opacity 0.5s ease, transform 0.5s ease, width 0.5s ease, padding 0.5s ease, margin 0.5s ease;
+        width: 78vw;
+        min-width: 265px;
       }
-      /* 🌟 當觸發消失時的樣式 */
-      .bb-card.fade-out {
-        opacity: 0;
-        transform: scale(0.7);
-        width: 0px;
-        padding: 0px;
-        margin: 0px;
-        border: 0px solid transparent;
-        overflow: hidden;
-      }
+    }
+  </style>
+</head>
 
-      .bb-title { font-size: 1.2rem; color: #33FFCC; margin-bottom: 12px; font-weight: bold; }
-      
-      .image-container {
-        width: 100%;
-        aspect-ratio: 9 / 16;
-        border-radius: 15px;
-        overflow: hidden;
-        margin-bottom: 15px;
-        background-color: #050505;
-        border: 1px solid #1a1a1a;
-      }
-      .image-container img { width: 100%; height: 100%; object-fit: cover; display: block; }
-      .bb-body { font-size: 0.95rem; line-height: 1.5; text-align: center; color: #FFFFFF; margin-bottom: 15px; }
-
-      /* 控制按鈕區排版 ⚙️ */
-      .card-control-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        width: 100%;
-        align-items: center;
-      }
-
-      .share-card-btn, .remove-card-btn {
-        background-color: #1a1a1a;
-        border-radius: 20px;
-        padding: 6px 15px;
-        font-size: 0.8rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        width: 85%;
-        text-align: center;
-        box-sizing: border-box;
-      }
-      .share-card-btn { color: #33FFCC; border: 1px solid #33FFCC; }
-      .share-card-btn:active { background-color: #33FFCC; color: #000000; }
-
-      /* 🛑 通報已撤走按鈕樣式 */
-      .remove-card-btn { color: #FF4444; border: 1px solid #FF4444; }
-      .remove-card-btn:active { background-color: #FF4444; color: #FFFFFF; }
-
-      #no-data {
-        width: 100%; text-align: center; color: #444444; 
-        font-size: 1rem; position: absolute; top: 50%; transform: translateY(-50%);
-      }
-    </style>
-  </head>
-  <body>
-
-    <header id="header">
-      <div class="brand-group">
-        <div class="brand-title">BBPATROL</div>
-        <div class="brand-subtitle">Black Box System</div>
-      </div>
-      <div style="display: flex; gap: 8px;">
-        <button class="back-btn" id="back-btn" onclick="showMenu()">⬅ 返回區域</button>
-        <button class="refresh-btn" id="refresh-btn" onclick="refreshCurrentRegion()">🔄 刷新資料</button>
-      </div>
-    </header>
-
-    <div id="main-wrapper">
-      <div id="menu-screen">
-        <div class="region-btn" onclick="filterData('北北基')">北北基</div>
-        <div class="region-btn" onclick="filterData('桃竹苗')">桃竹苗</div>
-        <div class="region-btn" onclick="filterData('中彰投')">中彰投</div>
-        <div class="region-btn" onclick="filterData('雲嘉南')">雲嘉南</div>
-        <div class="region-btn" onclick="filterData('高屏')">高屏</div>
-        <div class="region-btn" onclick="filterData('宜花東')">宜花東</div>
-      </div>
-
-      <div id="data-screen"></div>
-      <div id="no-data" style="display: none;">該區域暫無糾察紀錄</div>
+<body>
+  <header id="header">
+    <div class="brand-group">
+      <div class="brand-title">BBPATROL</div>
+      <div class="brand-subtitle">Black Box System</div>
     </div>
 
-    <script>
-      const SUPABASE_URL = "你的 Supabase Project URL";
-      const SUPABASE_ANON_KEY = "你的 Supabase anon key";
+    <div class="header-actions">
+      <button class="back-btn" id="back-btn" onclick="showMenu()">← 返回區域</button>
+      <button class="refresh-btn" id="refresh-btn" onclick="refreshCurrentRegion()">🔄 刷新資料</button>
+    </div>
+  </header>
 
-      const supabase = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-      );
-      var allData = [];       
-      var currentRegion = ""; 
+  <main id="main-wrapper">
+    <div id="menu-screen">
+      <div class="region-btn" onclick="filterData('北北基')">北北基</div>
+      <div class="region-btn" onclick="filterData('桃竹苗')">桃竹苗</div>
+      <div class="region-btn" onclick="filterData('中彰投')">中彰投</div>
+      <div class="region-btn" onclick="filterData('雲嘉南')">雲嘉南</div>
+      <div class="region-btn" onclick="filterData('高屏')">高屏</div>
+      <div class="region-btn" onclick="filterData('宜花東')">宜花東</div>
+    </div>
 
-      window.onload = function() {
-        loadDataFromServer();
-      };
+    <div id="data-screen"></div>
+    <div id="loading-text" style="display: none;">資料同步中...</div>
+    <div id="no-data" style="display: none;">該區域暫無糾察紀錄</div>
+  </main>
 
-      async function loadDataFromServer(callback) {
-  const { data, error } = await supabase
-    .from('noise_reports')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
+  <script>
+    /*
+      ⚠️ 請改成你的 Supabase 資料
+      Supabase 後台位置：
+      Project Settings → API
+      - Project URL
+      - anon public key
+    */
+    const SUPABASE_URL = "你的 Supabase Project URL";
+    const SUPABASE_ANON_KEY = "你的 Supabase anon public key";
 
-  if (error) {
-    console.error(error);
-    allData = [];
-    alert("資料讀取失敗：" + error.message);
-    return;
-  }
+    const supabase = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
 
-  allData = data.map(function(item) {
-    return {
-      rowIndex: item.id,
-      text: item.text,
-      imageUrl: item.image_url,
-      region: item.region,
-      reportLogs: item.report_logs || "",
-      reportCount: item.report_count || 0
-    };
-  });
+    const REGION_LIST = ["北北基", "桃竹苗", "中彰投", "雲嘉南", "高屏", "宜花東"];
 
-  if (callback) callback();
-}
+    let allData = [];
+    let currentRegion = "";
 
-      function filterData(regionName) {
-        currentRegion = regionName; 
-        var dataScreen = document.getElementById('data-screen');
-        var noData = document.getElementById('no-data');
-        dataScreen.innerHTML = ""; 
-        
-        var filtered = allData.filter(function(item) {
-          return item.region.toString().trim() === regionName;
+    window.addEventListener("load", async function () {
+      getDeviceId();
+      showLoading("資料同步中...");
+
+      await loadDataFromServer();
+
+      hideLoading();
+
+      const params = new URLSearchParams(window.location.search);
+      const region = params.get("region");
+      const id = params.get("id");
+
+      if (region && REGION_LIST.includes(region)) {
+        filterData(region);
+
+        if (id) {
+          setTimeout(function () {
+            scrollToCard(id);
+          }, 300);
+        }
+      }
+    });
+
+    function showLoading(text) {
+      const loadingText = document.getElementById("loading-text");
+      loadingText.classList.remove("error-text");
+      loadingText.textContent = text || "資料同步中...";
+      loadingText.style.display = "block";
+    }
+
+    function showError(text) {
+      const loadingText = document.getElementById("loading-text");
+      loadingText.classList.add("error-text");
+      loadingText.textContent = text || "資料讀取失敗";
+      loadingText.style.display = "block";
+    }
+
+    function hideLoading() {
+      document.getElementById("loading-text").style.display = "none";
+    }
+
+    function getDeviceId() {
+      let deviceId = localStorage.getItem("bbp_noise_device_id");
+
+      if (!deviceId) {
+        deviceId =
+          "dev_" +
+          Date.now().toString(36) +
+          "_" +
+          Math.random().toString(36).slice(2, 12);
+
+        localStorage.setItem("bbp_noise_device_id", deviceId);
+      }
+
+      return deviceId;
+    }
+
+    async function loadDataFromServer(callback) {
+      try {
+        const { data, error } = await supabase
+          .from("noise_reports")
+          .select("id, text, image_url, region, report_logs, report_count, is_active, created_at")
+          .eq("is_active", true)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+
+        allData = (data || []).map(function (item) {
+          return {
+            id: item.id,
+            text: item.text || "",
+            imageUrl: item.image_url || "",
+            region: item.region || "",
+            reportLogs: item.report_logs || "",
+            reportCount: item.report_count || 0,
+            isActive: item.is_active,
+            createdAt: item.created_at || ""
+          };
         });
 
-        if (filtered.length > 0) {
-          filtered.forEach(function(item, index) {
-            var cardNumber = index + 1;
-            var cardHtml = '<div class="bb-card" id="card-box-' + item.rowIndex + '">';
-            cardHtml += '  <div class="bb-title">糾察紀錄 #' + cardNumber + '</div>';
-            if (item.imageUrl && item.imageUrl.toString().trim() !== "") {
-              cardHtml += '  <div class="image-container"><img src="' + item.imageUrl + '"></div>';
-            }
-            cardHtml += '  <div class="bb-body"><p>' + item.text + '</p></div>';
-            
-            // 🛠️ 按鈕控制群組
-            cardHtml += '  <div class="card-control-group">';
-            cardHtml += '    <button class="share-card-btn" onclick="shareCard(this, \'' + regionName + '\', ' + cardNumber + ')">🔗 分享此紀錄</button>';
-            // 🌟 塞入通報已撤走按鈕，直接帶入該筆資料的試算表真實列號 (rowIndex)
-            cardHtml += '    <button class="remove-card-btn" onclick="reportWithdraw(this, ' + item.rowIndex + ')">🛑 通報已撤走</button>';
-            cardHtml += '  </div>';
-            
-            cardHtml += '</div>';
-            dataScreen.innerHTML += cardHtml;
+        if (typeof callback === "function") {
+          callback();
+        }
+      } catch (error) {
+        console.error(error);
+        allData = [];
+        showError("資料讀取失敗：" + error.message);
+      }
+    }
+
+    function filterData(regionName) {
+      currentRegion = regionName;
+
+      const dataScreen = document.getElementById("data-screen");
+      const noData = document.getElementById("no-data");
+
+      dataScreen.innerHTML = "";
+      hideLoading();
+
+      const filtered = allData.filter(function (item) {
+        return String(item.region).trim() === regionName;
+      });
+
+      if (filtered.length > 0) {
+        filtered.forEach(function (item, index) {
+          const cardElement = createCardElement(item, index + 1, regionName);
+          dataScreen.appendChild(cardElement);
+        });
+
+        dataScreen.style.display = "flex";
+        noData.style.display = "none";
+      } else {
+        dataScreen.style.display = "none";
+        noData.style.display = "block";
+      }
+
+      document.getElementById("menu-screen").style.display = "none";
+      document.getElementById("back-btn").style.display = "block";
+      document.getElementById("refresh-btn").style.display = "block";
+
+      const cleanUrl =
+        window.location.protocol +
+        "//" +
+        window.location.host +
+        window.location.pathname +
+        "?region=" +
+        encodeURIComponent(regionName);
+
+      window.history.replaceState({}, "", cleanUrl);
+    }
+
+    function createCardElement(item, cardNumber, regionName) {
+      const card = document.createElement("div");
+      card.className = "bb-card";
+      card.id = "card-box-" + item.id;
+
+      const title = document.createElement("div");
+      title.className = "bb-title";
+      title.textContent = "糾察紀錄 #" + cardNumber;
+      card.appendChild(title);
+
+      if (item.imageUrl && item.imageUrl.trim() !== "") {
+        const imageContainer = document.createElement("div");
+        imageContainer.className = "image-container";
+
+        const img = document.createElement("img");
+        img.src = item.imageUrl;
+        img.alt = "BBPATROL 噪音偵測紀錄圖片";
+        img.loading = "lazy";
+
+        img.onerror = function () {
+          imageContainer.style.display = "none";
+        };
+
+        imageContainer.appendChild(img);
+        card.appendChild(imageContainer);
+      }
+
+      const body = document.createElement("div");
+      body.className = "bb-body";
+      body.textContent = item.text;
+      card.appendChild(body);
+
+      const meta = document.createElement("div");
+      meta.className = "bb-meta";
+      meta.textContent = "撤走通報：" + item.reportCount + "/10";
+      card.appendChild(meta);
+
+      const controls = document.createElement("div");
+      controls.className = "card-control-group";
+
+      const shareBtn = document.createElement("button");
+      shareBtn.className = "share-card-btn";
+      shareBtn.type = "button";
+      shareBtn.textContent = "🔗 分享此紀錄";
+      shareBtn.addEventListener("click", function () {
+        shareCard(shareBtn, regionName, item.id);
+      });
+
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "remove-card-btn";
+      removeBtn.type = "button";
+
+      const localKey = "bbp_noise_reported_" + item.id;
+      const lastReportedAt = Number(localStorage.getItem(localKey) || "0");
+      const isCoolingDown = Date.now() - lastReportedAt < 10 * 60 * 1000;
+
+      if (isCoolingDown) {
+        removeBtn.disabled = true;
+        removeBtn.textContent = "✅ 已通報";
+      } else {
+        removeBtn.textContent = "🛑 通報已撤走";
+        removeBtn.addEventListener("click", function () {
+          reportWithdraw(removeBtn, item.id);
+        });
+      }
+
+      controls.appendChild(shareBtn);
+      controls.appendChild(removeBtn);
+
+      card.appendChild(controls);
+
+      return card;
+    }
+
+    function showMenu() {
+      currentRegion = "";
+
+      document.getElementById("menu-screen").style.display = "grid";
+      document.getElementById("data-screen").style.display = "none";
+      document.getElementById("no-data").style.display = "none";
+      document.getElementById("back-btn").style.display = "none";
+      document.getElementById("refresh-btn").style.display = "none";
+      hideLoading();
+
+      const cleanUrl =
+        window.location.protocol +
+        "//" +
+        window.location.host +
+        window.location.pathname;
+
+      window.history.replaceState({}, "", cleanUrl);
+    }
+
+    async function refreshCurrentRegion() {
+      if (!currentRegion) {
+        return;
+      }
+
+      const dataScreen = document.getElementById("data-screen");
+      const noData = document.getElementById("no-data");
+
+      noData.style.display = "none";
+      dataScreen.style.display = "none";
+      dataScreen.innerHTML = "";
+
+      showLoading("數據即時同步中...");
+
+      await loadDataFromServer(function () {
+        filterData(currentRegion);
+      });
+    }
+
+    async function shareCard(buttonObj, region, reportId) {
+      const baseUrl =
+        window.location.protocol +
+        "//" +
+        window.location.host +
+        window.location.pathname;
+
+      const shareUrl =
+        baseUrl +
+        "?region=" +
+        encodeURIComponent(region) +
+        "&id=" +
+        encodeURIComponent(reportId);
+
+      try {
+        if (navigator.share) {
+          await navigator.share({
+            title: "BBPATROL 噪音偵測紀錄",
+            text: "查看此噪音偵測紀錄",
+            url: shareUrl
           });
-          dataScreen.style.display = "flex";
-          noData.style.display = "none";
-        } else {
-          dataScreen.style.display = "none";
-          noData.style.display = "block";
+          return;
         }
 
-        document.getElementById('menu-screen').style.display = "none";
-        document.getElementById('back-btn').style.display = "block";
-        document.getElementById('refresh-btn').style.display = "block";
-      }
+        await navigator.clipboard.writeText(shareUrl);
+        showShareSuccess(buttonObj);
+      } catch (error) {
+        console.warn(error);
 
-      function showMenu() {
-        document.getElementById('menu-screen').style.display = "grid";
-        document.getElementById('data-screen').style.display = "none";
-        document.getElementById('no-data').style.display = "none";
-        document.getElementById('back-btn').style.display = "none";
-        document.getElementById('refresh-btn').style.display = "none";
-      }
-
-      function refreshCurrentRegion() {
-        var dataScreen = document.getElementById('data-screen');
-        document.getElementById('no-data').style.display = "none";
-        dataScreen.innerHTML = '<p style="width:100%; text-align:center; color:#444444; font-size:1rem;">數據即時同步中...</p>';
-        
-        loadDataFromServer(function() {
-          filterData(currentRegion);
-        });
-      }
-
-      function shareCard(buttonObj, region, cardNum) {
-        var baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
-        var shareUrl = baseUrl + '?region=' + encodeURIComponent(region) + '&card=' + cardNum;
-
-        navigator.clipboard.writeText(shareUrl).then(function() {
-          buttonObj.innerText = "✅ 已複製到剪貼簿";
-          buttonObj.style.borderColor = "#33FFCC";
-          buttonObj.style.color = "#000000";
-          buttonObj.style.backgroundColor = "#33FFCC";
-          setTimeout(function() {
-            buttonObj.innerText = "🔗 分享此紀錄";
-            buttonObj.style.borderColor = "#33FFCC";
-            buttonObj.style.color = "#33FFCC";
-            buttonObj.style.backgroundColor = "#1a1a1a";
-          }, 2000);
-        });
-      }
-
-      // 🛑 處理通報並即時鎖定按鈕
-      function reportWithdraw(buttonObj, rowIndex) {
-        // 點擊瞬間立刻將按鈕反灰 🔒
-        buttonObj.disabled = true;
-        buttonObj.innerText = "⏳ 處理中...";
-
-        async function reportItemRemoved(buttonObj, reportId) {
-  buttonObj.disabled = true;
-  buttonObj.innerText = "⏳ 處理中...";
-
-  try {
-    const { data: item, error: fetchError } = await supabase
-      .from('noise_reports')
-      .select('report_logs, report_count')
-      .eq('id', reportId)
-      .single();
-
-    if (fetchError) {
-      throw fetchError;
-    }
-
-    const now = new Date();
-    const nowText = formatDateTime(now);
-    const currentCount = item.report_count || 0;
-    const newCount = currentCount + 1;
-
-    const oldLogs = item.report_logs ? item.report_logs + "\n" : "";
-    const newLogs = oldLogs + nowText + " " + newCount + "/10";
-
-    if (newCount >= 10) {
-      const { error: updateError } = await supabase
-        .from('noise_reports')
-        .update({
-          report_logs: newLogs,
-          report_count: newCount,
-          is_active: false
-        })
-        .eq('id', reportId);
-
-      if (updateError) {
-        throw updateError;
-      }
-
-      buttonObj.innerText = "✅ 達標！資料移除中";
-
-      setTimeout(function() {
-        var targetCardBox = document.getElementById('card-box-' + reportId);
-        if (targetCardBox) {
-          targetCardBox.classList.add('fade-out');
-          setTimeout(function() {
-            loadDataFromServer(function() {
-              filterData(currentRegion);
-            });
-          }, 500);
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          showShareSuccess(buttonObj);
+        } catch (copyError) {
+          alert("分享連結複製失敗，請手動複製網址列連結。");
         }
-      }, 1000);
-
-    } else {
-      const { error: updateError } = await supabase
-        .from('noise_reports')
-        .update({
-          report_logs: newLogs,
-          report_count: newCount
-        })
-        .eq('id', reportId);
-
-      if (updateError) {
-        throw updateError;
       }
-
-      buttonObj.innerText = "✅ 已通報完成";
     }
 
-  } catch (error) {
-    console.error(error);
-    buttonObj.innerText = "❌ 系統錯誤";
-    buttonObj.disabled = false;
-  }
-}
+    function showShareSuccess(buttonObj) {
+      const oldText = buttonObj.textContent;
 
-function formatDateTime(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  const h = String(date.getHours()).padStart(2, '0');
-  const min = String(date.getMinutes()).padStart(2, '0');
-  return `${y}/${m}/${d} ${h}:${min}`;
-}
-    </script>
-  </body>
+      buttonObj.textContent = "✅ 已複製到剪貼簿";
+      buttonObj.style.borderColor = "#33ffcc";
+      buttonObj.style.color = "#000000";
+      buttonObj.style.backgroundColor = "#33ffcc";
+
+      setTimeout(function () {
+        buttonObj.textContent = oldText || "🔗 分享此紀錄";
+        buttonObj.style.borderColor = "#33ffcc";
+        buttonObj.style.color = "#33ffcc";
+        buttonObj.style.backgroundColor = "#1a1a1a";
+      }, 2000);
+    }
+
+    async function reportWithdraw(buttonObj, reportId) {
+      const deviceId = getDeviceId();
+
+      buttonObj.disabled = true;
+      buttonObj.textContent = "⏳ 處理中...";
+
+      try {
+        const { data, error } = await supabase.rpc("report_noise_withdraw", {
+          p_report_id: reportId,
+          p_device_id: deviceId
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        const result = data || {};
+
+        if (result.status === "cooldown") {
+          buttonObj.textContent = "✅ 已通報";
+          localStorage.setItem("bbp_noise_reported_" + reportId, String(Date.now()));
+          return;
+        }
+
+        if (result.status === "updated") {
+          buttonObj.textContent = "✅ 已通報完成";
+          localStorage.setItem("bbp_noise_reported_" + reportId, String(Date.now()));
+
+          setTimeout(function () {
+            refreshCurrentRegion();
+          }, 1200);
+
+          return;
+        }
+
+        if (result.status === "deleted") {
+          buttonObj.textContent = "✅ 達標，資料下架中";
+          localStorage.setItem("bbp_noise_reported_" + reportId, String(Date.now()));
+
+          setTimeout(function () {
+            const targetCardBox = document.getElementById("card-box-" + reportId);
+
+            if (targetCardBox) {
+              targetCardBox.classList.add("fade-out");
+
+              setTimeout(async function () {
+                await loadDataFromServer(function () {
+                  filterData(currentRegion);
+                });
+              }, 550);
+            } else {
+              refreshCurrentRegion();
+            }
+          }, 800);
+
+          return;
+        }
+
+        if (result.status === "not_found") {
+          buttonObj.textContent = "⚠️ 已下架或不存在";
+
+          setTimeout(function () {
+            refreshCurrentRegion();
+          }, 1200);
+
+          return;
+        }
+
+        buttonObj.textContent = "⚠️ 無法通報";
+
+        setTimeout(function () {
+          buttonObj.disabled = false;
+          buttonObj.textContent = "🛑 通報已撤走";
+        }, 2000);
+
+      } catch (error) {
+        console.error(error);
+        buttonObj.textContent = "❌ 系統錯誤";
+
+        setTimeout(function () {
+          buttonObj.disabled = false;
+          buttonObj.textContent = "🛑 通報已撤走";
+        }, 2200);
+      }
+    }
+
+    function scrollToCard(reportId) {
+      const targetCard = document.getElementById("card-box-" + reportId);
+
+      if (targetCard) {
+        targetCard.scrollIntoView({
+          behavior: "smooth",
+          inline: "center",
+          block: "nearest"
+        });
+      }
+    }
+  </script>
+</body>
 </html>
