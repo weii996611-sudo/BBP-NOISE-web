@@ -340,435 +340,430 @@
   </main>
 
   <script>
-    /*
-      ⚠️ 請改成你的 Supabase 資料
-      Supabase 後台位置：
-      Project Settings → API
-      - Project URL
-      - anon public key
-    */
-    const SUPABASE_URL = "https://sadnhsddereuhpfvdquk.supabaseClient.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_k_u54EP-ZibEk5ABR2_lQA__c41LUZI";
+  const SUPABASE_URL = "https://sadnhsddereuhpfvdquk.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_k_u54EP-ZibEk5ABR2_lQA__c41LUZI";
 
-    const supabaseClient = window.supabaseClient.createClient(
-      var allData = [];
-      var currentRegion = "";
-      var supabaseClient = null;
+  const REGION_LIST = ["北北基", "桃竹苗", "中彰投", "雲嘉南", "高屏", "宜花東"];
 
-      if (window.supabase && window.supabase.createClient) {
-        supabaseClient = window.supabase.createClient(
-          SUPABASE_URL,
-          SUPABASE_ANON_KEY
-        );
-      } else {
-        console.error("Supabase CDN 載入失敗，請確認 <script src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'></script> 是否存在");
+  let allData = [];
+  let currentRegion = "";
+  let supabaseClient = null;
+
+  if (window.supabase && window.supabase.createClient) {
+    supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+  } else {
+    console.error("Supabase CDN 載入失敗");
+  }
+
+  window.addEventListener("load", async function () {
+    getDeviceId();
+    showLoading("資料同步中...");
+
+    await loadDataFromServer();
+
+    hideLoading();
+
+    const params = new URLSearchParams(window.location.search);
+    const region = params.get("region");
+    const id = params.get("id");
+
+    if (region && REGION_LIST.includes(region)) {
+      filterData(region);
+
+      if (id) {
+        setTimeout(function () {
+          scrollToCard(id);
+        }, 300);
       }
+    }
+  });
 
-    const REGION_LIST = ["北北基", "桃竹苗", "中彰投", "雲嘉南", "高屏", "宜花東"];
+  function showLoading(text) {
+    const loadingText = document.getElementById("loading-text");
+    loadingText.classList.remove("error-text");
+    loadingText.textContent = text || "資料同步中...";
+    loadingText.style.display = "block";
+  }
 
-    let allData = [];
-    let currentRegion = "";
+  function showError(text) {
+    const loadingText = document.getElementById("loading-text");
+    loadingText.classList.add("error-text");
+    loadingText.textContent = text || "資料讀取失敗";
+    loadingText.style.display = "block";
+  }
 
-    window.addEventListener("load", async function () {
-      getDeviceId();
-      showLoading("資料同步中...");
+  function hideLoading() {
+    document.getElementById("loading-text").style.display = "none";
+  }
 
-      await loadDataFromServer();
+  function getDeviceId() {
+    let deviceId = localStorage.getItem("bbp_noise_device_id");
 
-      hideLoading();
+    if (!deviceId) {
+      deviceId =
+        "dev_" +
+        Date.now().toString(36) +
+        "_" +
+        Math.random().toString(36).slice(2, 12);
 
-      const params = new URLSearchParams(window.location.search);
-      const region = params.get("region");
-      const id = params.get("id");
-
-      if (region && REGION_LIST.includes(region)) {
-        filterData(region);
-
-        if (id) {
-          setTimeout(function () {
-            scrollToCard(id);
-          }, 300);
-        }
-      }
-    });
-
-    function showLoading(text) {
-      const loadingText = document.getElementById("loading-text");
-      loadingText.classList.remove("error-text");
-      loadingText.textContent = text || "資料同步中...";
-      loadingText.style.display = "block";
+      localStorage.setItem("bbp_noise_device_id", deviceId);
     }
 
-    function showError(text) {
-      const loadingText = document.getElementById("loading-text");
-      loadingText.classList.add("error-text");
-      loadingText.textContent = text || "資料讀取失敗";
-      loadingText.style.display = "block";
-    }
+    return deviceId;
+  }
 
-    function hideLoading() {
-      document.getElementById("loading-text").style.display = "none";
-    }
-
-    function getDeviceId() {
-      let deviceId = localStorage.getItem("bbp_noise_device_id");
-
-      if (!deviceId) {
-        deviceId =
-          "dev_" +
-          Date.now().toString(36) +
-          "_" +
-          Math.random().toString(36).slice(2, 12);
-
-        localStorage.setItem("bbp_noise_device_id", deviceId);
-      }
-
-      return deviceId;
-    }
-
-    async function loadDataFromServer(callback) {
-     if (!supabaseClient) {
+  async function loadDataFromServer(callback) {
+    if (!supabaseClient) {
+      allData = [];
       showError("Supabase 尚未成功連線，請檢查 CDN、URL、anon key。");
       return;
-     }
-      try {
-        const { data, error } = await supabase
-          .from("noise_reports")
-          .select("id, text, image_url, region, report_logs, report_count, is_active, created_at")
-          .eq("is_active", true)
-          .order("created_at", { ascending: false });
-
-        if (error) {
-          throw error;
-        }
-
-        allData = (data || []).map(function (item) {
-          return {
-            id: item.id,
-            text: item.text || "",
-            imageUrl: item.image_url || "",
-            region: item.region || "",
-            reportLogs: item.report_logs || "",
-            reportCount: item.report_count || 0,
-            isActive: item.is_active,
-            createdAt: item.created_at || ""
-          };
-        });
-
-        if (typeof callback === "function") {
-          callback();
-        }
-      } catch (error) {
-        console.error(error);
-        allData = [];
-        showError("資料讀取失敗：" + error.message);
-      }
     }
 
-    function filterData(regionName) {
-      currentRegion = regionName;
+    try {
+      const { data, error } = await supabaseClient
+        .from("noise_reports")
+        .select("id, text, image_url, region, report_logs, report_count, is_active, created_at")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
 
-      const dataScreen = document.getElementById("data-screen");
-      const noData = document.getElementById("no-data");
-
-      dataScreen.innerHTML = "";
-      hideLoading();
-
-      const filtered = allData.filter(function (item) {
-        return String(item.region).trim() === regionName;
-      });
-
-      if (filtered.length > 0) {
-        filtered.forEach(function (item, index) {
-          const cardElement = createCardElement(item, index + 1, regionName);
-          dataScreen.appendChild(cardElement);
-        });
-
-        dataScreen.style.display = "flex";
-        noData.style.display = "none";
-      } else {
-        dataScreen.style.display = "none";
-        noData.style.display = "block";
+      if (error) {
+        throw error;
       }
 
-      document.getElementById("menu-screen").style.display = "none";
-      document.getElementById("back-btn").style.display = "block";
-      document.getElementById("refresh-btn").style.display = "block";
-
-      const cleanUrl =
-        window.location.protocol +
-        "//" +
-        window.location.host +
-        window.location.pathname +
-        "?region=" +
-        encodeURIComponent(regionName);
-
-      window.history.replaceState({}, "", cleanUrl);
-    }
-
-    function createCardElement(item, cardNumber, regionName) {
-      const card = document.createElement("div");
-      card.className = "bb-card";
-      card.id = "card-box-" + item.id;
-
-      const title = document.createElement("div");
-      title.className = "bb-title";
-      title.textContent = "糾察紀錄 #" + cardNumber;
-      card.appendChild(title);
-
-      if (item.imageUrl && item.imageUrl.trim() !== "") {
-        const imageContainer = document.createElement("div");
-        imageContainer.className = "image-container";
-
-        const img = document.createElement("img");
-        img.src = item.imageUrl;
-        img.alt = "BBPATROL 噪音偵測紀錄圖片";
-        img.loading = "lazy";
-
-        img.onerror = function () {
-          imageContainer.style.display = "none";
+      allData = (data || []).map(function (item) {
+        return {
+          id: item.id,
+          text: item.text || "",
+          imageUrl: item.image_url || "",
+          region: item.region || "",
+          reportLogs: item.report_logs || "",
+          reportCount: item.report_count || 0,
+          isActive: item.is_active,
+          createdAt: item.created_at || ""
         };
-
-        imageContainer.appendChild(img);
-        card.appendChild(imageContainer);
-      }
-
-      const body = document.createElement("div");
-      body.className = "bb-body";
-      body.textContent = item.text;
-      card.appendChild(body);
-
-      const meta = document.createElement("div");
-      meta.className = "bb-meta";
-      meta.textContent = "撤走通報：" + item.reportCount + "/10";
-      card.appendChild(meta);
-
-      const controls = document.createElement("div");
-      controls.className = "card-control-group";
-
-      const shareBtn = document.createElement("button");
-      shareBtn.className = "share-card-btn";
-      shareBtn.type = "button";
-      shareBtn.textContent = "🔗 分享此紀錄";
-      shareBtn.addEventListener("click", function () {
-        shareCard(shareBtn, regionName, item.id);
       });
 
-      const removeBtn = document.createElement("button");
-      removeBtn.className = "remove-card-btn";
-      removeBtn.type = "button";
-
-      const localKey = "bbp_noise_reported_" + item.id;
-      const lastReportedAt = Number(localStorage.getItem(localKey) || "0");
-      const isCoolingDown = Date.now() - lastReportedAt < 10 * 60 * 1000;
-
-      if (isCoolingDown) {
-        removeBtn.disabled = true;
-        removeBtn.textContent = "✅ 已通報";
-      } else {
-        removeBtn.textContent = "🛑 通報已撤走";
-        removeBtn.addEventListener("click", function () {
-          reportWithdraw(removeBtn, item.id);
-        });
+      if (typeof callback === "function") {
+        callback();
       }
+    } catch (error) {
+      console.error(error);
+      allData = [];
+      showError("資料讀取失敗：" + error.message);
+    }
+  }
 
-      controls.appendChild(shareBtn);
-      controls.appendChild(removeBtn);
+  function filterData(regionName) {
+    currentRegion = regionName;
 
-      card.appendChild(controls);
+    const dataScreen = document.getElementById("data-screen");
+    const noData = document.getElementById("no-data");
 
-      return card;
+    dataScreen.innerHTML = "";
+    hideLoading();
+
+    const filtered = allData.filter(function (item) {
+      return String(item.region).trim() === regionName;
+    });
+
+    if (filtered.length > 0) {
+      filtered.forEach(function (item, index) {
+        const cardElement = createCardElement(item, index + 1, regionName);
+        dataScreen.appendChild(cardElement);
+      });
+
+      dataScreen.style.display = "flex";
+      noData.style.display = "none";
+    } else {
+      dataScreen.style.display = "none";
+      noData.style.display = "block";
     }
 
-    function showMenu() {
-      currentRegion = "";
+    document.getElementById("menu-screen").style.display = "none";
+    document.getElementById("back-btn").style.display = "block";
+    document.getElementById("refresh-btn").style.display = "block";
 
-      document.getElementById("menu-screen").style.display = "grid";
-      document.getElementById("data-screen").style.display = "none";
-      document.getElementById("no-data").style.display = "none";
-      document.getElementById("back-btn").style.display = "none";
-      document.getElementById("refresh-btn").style.display = "none";
-      hideLoading();
+    const cleanUrl =
+      window.location.protocol +
+      "//" +
+      window.location.host +
+      window.location.pathname +
+      "?region=" +
+      encodeURIComponent(regionName);
 
-      const cleanUrl =
-        window.location.protocol +
-        "//" +
-        window.location.host +
-        window.location.pathname;
+    window.history.replaceState({}, "", cleanUrl);
+  }
 
-      window.history.replaceState({}, "", cleanUrl);
+  function createCardElement(item, cardNumber, regionName) {
+    const card = document.createElement("div");
+    card.className = "bb-card";
+    card.id = "card-box-" + item.id;
+
+    const title = document.createElement("div");
+    title.className = "bb-title";
+    title.textContent = "糾察紀錄 #" + cardNumber;
+    card.appendChild(title);
+
+    if (item.imageUrl && item.imageUrl.trim() !== "") {
+      const imageContainer = document.createElement("div");
+      imageContainer.className = "image-container";
+
+      const img = document.createElement("img");
+      img.src = item.imageUrl;
+      img.alt = "BBPATROL 噪音偵測紀錄圖片";
+      img.loading = "lazy";
+
+      img.onerror = function () {
+        imageContainer.style.display = "none";
+      };
+
+      imageContainer.appendChild(img);
+      card.appendChild(imageContainer);
     }
 
-    async function refreshCurrentRegion() {
-      if (!currentRegion) {
+    const body = document.createElement("div");
+    body.className = "bb-body";
+    body.textContent = item.text;
+    card.appendChild(body);
+
+    const meta = document.createElement("div");
+    meta.className = "bb-meta";
+    meta.textContent = "撤走通報：" + item.reportCount + "/10";
+    card.appendChild(meta);
+
+    const controls = document.createElement("div");
+    controls.className = "card-control-group";
+
+    const shareBtn = document.createElement("button");
+    shareBtn.className = "share-card-btn";
+    shareBtn.type = "button";
+    shareBtn.textContent = "🔗 分享此紀錄";
+    shareBtn.addEventListener("click", function () {
+      shareCard(shareBtn, regionName, item.id);
+    });
+
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "remove-card-btn";
+    removeBtn.type = "button";
+
+    const localKey = "bbp_noise_reported_" + item.id;
+    const lastReportedAt = Number(localStorage.getItem(localKey) || "0");
+    const isCoolingDown = Date.now() - lastReportedAt < 10 * 60 * 1000;
+
+    if (isCoolingDown) {
+      removeBtn.disabled = true;
+      removeBtn.textContent = "✅ 已通報";
+    } else {
+      removeBtn.textContent = "🛑 通報已撤走";
+      removeBtn.addEventListener("click", function () {
+        reportWithdraw(removeBtn, item.id);
+      });
+    }
+
+    controls.appendChild(shareBtn);
+    controls.appendChild(removeBtn);
+    card.appendChild(controls);
+
+    return card;
+  }
+
+  function showMenu() {
+    currentRegion = "";
+
+    document.getElementById("menu-screen").style.display = "grid";
+    document.getElementById("data-screen").style.display = "none";
+    document.getElementById("no-data").style.display = "none";
+    document.getElementById("back-btn").style.display = "none";
+    document.getElementById("refresh-btn").style.display = "none";
+    hideLoading();
+
+    const cleanUrl =
+      window.location.protocol +
+      "//" +
+      window.location.host +
+      window.location.pathname;
+
+    window.history.replaceState({}, "", cleanUrl);
+  }
+
+  async function refreshCurrentRegion() {
+    if (!currentRegion) {
+      return;
+    }
+
+    const dataScreen = document.getElementById("data-screen");
+    const noData = document.getElementById("no-data");
+
+    noData.style.display = "none";
+    dataScreen.style.display = "none";
+    dataScreen.innerHTML = "";
+
+    showLoading("數據即時同步中...");
+
+    await loadDataFromServer(function () {
+      filterData(currentRegion);
+    });
+  }
+
+  async function shareCard(buttonObj, region, reportId) {
+    const baseUrl =
+      window.location.protocol +
+      "//" +
+      window.location.host +
+      window.location.pathname;
+
+    const shareUrl =
+      baseUrl +
+      "?region=" +
+      encodeURIComponent(region) +
+      "&id=" +
+      encodeURIComponent(reportId);
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "BBPATROL 噪音偵測紀錄",
+          text: "查看此噪音偵測紀錄",
+          url: shareUrl
+        });
         return;
       }
 
-      const dataScreen = document.getElementById("data-screen");
-      const noData = document.getElementById("no-data");
-
-      noData.style.display = "none";
-      dataScreen.style.display = "none";
-      dataScreen.innerHTML = "";
-
-      showLoading("數據即時同步中...");
-
-      await loadDataFromServer(function () {
-        filterData(currentRegion);
-      });
-    }
-
-    async function shareCard(buttonObj, region, reportId) {
-      const baseUrl =
-        window.location.protocol +
-        "//" +
-        window.location.host +
-        window.location.pathname;
-
-      const shareUrl =
-        baseUrl +
-        "?region=" +
-        encodeURIComponent(region) +
-        "&id=" +
-        encodeURIComponent(reportId);
+      await navigator.clipboard.writeText(shareUrl);
+      showShareSuccess(buttonObj);
+    } catch (error) {
+      console.warn(error);
 
       try {
-        if (navigator.share) {
-          await navigator.share({
-            title: "BBPATROL 噪音偵測紀錄",
-            text: "查看此噪音偵測紀錄",
-            url: shareUrl
-          });
-          return;
-        }
-
         await navigator.clipboard.writeText(shareUrl);
         showShareSuccess(buttonObj);
-      } catch (error) {
-        console.warn(error);
-
-        try {
-          await navigator.clipboard.writeText(shareUrl);
-          showShareSuccess(buttonObj);
-        } catch (copyError) {
-          alert("分享連結複製失敗，請手動複製網址列連結。");
-        }
+      } catch (copyError) {
+        alert("分享連結複製失敗，請手動複製網址列連結。");
       }
     }
+  }
 
-    function showShareSuccess(buttonObj) {
-      const oldText = buttonObj.textContent;
+  function showShareSuccess(buttonObj) {
+    const oldText = buttonObj.textContent;
 
-      buttonObj.textContent = "✅ 已複製到剪貼簿";
+    buttonObj.textContent = "✅ 已複製到剪貼簿";
+    buttonObj.style.borderColor = "#33ffcc";
+    buttonObj.style.color = "#000000";
+    buttonObj.style.backgroundColor = "#33ffcc";
+
+    setTimeout(function () {
+      buttonObj.textContent = oldText || "🔗 分享此紀錄";
       buttonObj.style.borderColor = "#33ffcc";
-      buttonObj.style.color = "#000000";
-      buttonObj.style.backgroundColor = "#33ffcc";
+      buttonObj.style.color = "#33ffcc";
+      buttonObj.style.backgroundColor = "#1a1a1a";
+    }, 2000);
+  }
+
+  async function reportWithdraw(buttonObj, reportId) {
+    if (!supabaseClient) {
+      buttonObj.textContent = "❌ 連線失敗";
+      return;
+    }
+
+    const deviceId = getDeviceId();
+
+    buttonObj.disabled = true;
+    buttonObj.textContent = "⏳ 處理中...";
+
+    try {
+      const { data, error } = await supabaseClient.rpc("report_noise_withdraw", {
+        p_report_id: reportId,
+        p_device_id: deviceId
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      const result = data || {};
+
+      if (result.status === "cooldown") {
+        buttonObj.textContent = "✅ 已通報";
+        localStorage.setItem("bbp_noise_reported_" + reportId, String(Date.now()));
+        return;
+      }
+
+      if (result.status === "updated") {
+        buttonObj.textContent = "✅ 已通報完成";
+        localStorage.setItem("bbp_noise_reported_" + reportId, String(Date.now()));
+
+        setTimeout(function () {
+          refreshCurrentRegion();
+        }, 1200);
+
+        return;
+      }
+
+      if (result.status === "deleted") {
+        buttonObj.textContent = "✅ 達標，資料下架中";
+        localStorage.setItem("bbp_noise_reported_" + reportId, String(Date.now()));
+
+        setTimeout(function () {
+          const targetCardBox = document.getElementById("card-box-" + reportId);
+
+          if (targetCardBox) {
+            targetCardBox.classList.add("fade-out");
+
+            setTimeout(async function () {
+              await loadDataFromServer(function () {
+                filterData(currentRegion);
+              });
+            }, 550);
+          } else {
+            refreshCurrentRegion();
+          }
+        }, 800);
+
+        return;
+      }
+
+      if (result.status === "not_found") {
+        buttonObj.textContent = "⚠️ 已下架或不存在";
+
+        setTimeout(function () {
+          refreshCurrentRegion();
+        }, 1200);
+
+        return;
+      }
+
+      buttonObj.textContent = "⚠️ 無法通報";
 
       setTimeout(function () {
-        buttonObj.textContent = oldText || "🔗 分享此紀錄";
-        buttonObj.style.borderColor = "#33ffcc";
-        buttonObj.style.color = "#33ffcc";
-        buttonObj.style.backgroundColor = "#1a1a1a";
+        buttonObj.disabled = false;
+        buttonObj.textContent = "🛑 通報已撤走";
       }, 2000);
+
+    } catch (error) {
+      console.error(error);
+      buttonObj.textContent = "❌ 系統錯誤";
+
+      setTimeout(function () {
+        buttonObj.disabled = false;
+        buttonObj.textContent = "🛑 通報已撤走";
+      }, 2200);
     }
+  }
 
-    async function reportWithdraw(buttonObj, reportId) {
-      const deviceId = getDeviceId();
+  function scrollToCard(reportId) {
+    const targetCard = document.getElementById("card-box-" + reportId);
 
-      buttonObj.disabled = true;
-      buttonObj.textContent = "⏳ 處理中...";
-
-      try {
-        const { data, error } = await supabaseClient.rpc("report_noise_withdraw", {
-          p_report_id: reportId,
-          p_device_id: deviceId
-        });
-
-        if (error) {
-          throw error;
-        }
-
-        const result = data || {};
-
-        if (result.status === "cooldown") {
-          buttonObj.textContent = "✅ 已通報";
-          localStorage.setItem("bbp_noise_reported_" + reportId, String(Date.now()));
-          return;
-        }
-
-        if (result.status === "updated") {
-          buttonObj.textContent = "✅ 已通報完成";
-          localStorage.setItem("bbp_noise_reported_" + reportId, String(Date.now()));
-
-          setTimeout(function () {
-            refreshCurrentRegion();
-          }, 1200);
-
-          return;
-        }
-
-        if (result.status === "deleted") {
-          buttonObj.textContent = "✅ 達標，資料下架中";
-          localStorage.setItem("bbp_noise_reported_" + reportId, String(Date.now()));
-
-          setTimeout(function () {
-            const targetCardBox = document.getElementById("card-box-" + reportId);
-
-            if (targetCardBox) {
-              targetCardBox.classList.add("fade-out");
-
-              setTimeout(async function () {
-                await loadDataFromServer(function () {
-                  filterData(currentRegion);
-                });
-              }, 550);
-            } else {
-              refreshCurrentRegion();
-            }
-          }, 800);
-
-          return;
-        }
-
-        if (result.status === "not_found") {
-          buttonObj.textContent = "⚠️ 已下架或不存在";
-
-          setTimeout(function () {
-            refreshCurrentRegion();
-          }, 1200);
-
-          return;
-        }
-
-        buttonObj.textContent = "⚠️ 無法通報";
-
-        setTimeout(function () {
-          buttonObj.disabled = false;
-          buttonObj.textContent = "🛑 通報已撤走";
-        }, 2000);
-
-      } catch (error) {
-        console.error(error);
-        buttonObj.textContent = "❌ 系統錯誤";
-
-        setTimeout(function () {
-          buttonObj.disabled = false;
-          buttonObj.textContent = "🛑 通報已撤走";
-        }, 2200);
-      }
+    if (targetCard) {
+      targetCard.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest"
+      });
     }
-
-    function scrollToCard(reportId) {
-      const targetCard = document.getElementById("card-box-" + reportId);
-
-      if (targetCard) {
-        targetCard.scrollIntoView({
-          behavior: "smooth",
-          inline: "center",
-          block: "nearest"
-        });
-      }
-    }
-  </script>
+  }
+</script>
 </body>
 </html>
