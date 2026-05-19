@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <head>
     <base target="_top">
     <meta charset="UTF-8">
@@ -185,6 +186,13 @@
     </div>
 
     <script>
+      const SUPABASE_URL = "你的 Supabase Project URL";
+      const SUPABASE_ANON_KEY = "你的 Supabase anon key";
+
+      const supabase = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
       var allData = [];       
       var currentRegion = ""; 
 
@@ -192,14 +200,33 @@
         loadDataFromServer();
       };
 
-      function loadDataFromServer(callback) {
-        google.script.run
-          .withSuccessHandler(function(data) {
-            allData = data;
-            if (callback) callback(); 
-          })
-          .getLatestDataList();
-      }
+      async function loadDataFromServer(callback) {
+  const { data, error } = await supabase
+    .from('noise_reports')
+    .select('*')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error(error);
+    allData = [];
+    alert("資料讀取失敗：" + error.message);
+    return;
+  }
+
+  allData = data.map(function(item) {
+    return {
+      rowIndex: item.id,
+      text: item.text,
+      imageUrl: item.image_url,
+      region: item.region,
+      reportLogs: item.report_logs || "",
+      reportCount: item.report_count || 0
+    };
+  });
+
+  if (callback) callback();
+}
 
       function filterData(regionName) {
         currentRegion = regionName; 
@@ -285,47 +312,88 @@
         buttonObj.disabled = true;
         buttonObj.innerText = "⏳ 處理中...";
 
-        google.script.run
-          // 🟢 成功接到後端回傳的球
-          .withSuccessHandler(function(result) {
-            
-            if (result.status === "deleted" || result.status === "updated") {
-              var reportedList = getLocalReportedCards();
-              if (!reportedList.includes(rowIndex.toString())) {
-                reportedList.push(rowIndex.toString());
-                localStorage.setItem('reported_cards', reportedList.join(','));
-              }
-            }
+        async function reportItemRemoved(buttonObj, reportId) {
+  buttonObj.disabled = true;
+  buttonObj.innerText = "⏳ 處理中...";
 
-            if (result.status === "deleted") {
-              buttonObj.innerText = "✅ 達標！資料移除中";
-              setTimeout(function() {
-                var targetCardBox = document.getElementById('card-box-' + rowIndex);
-                if (targetCardBox) {
-                  targetCardBox.classList.add('fade-out'); 
-                  setTimeout(function() {
-                    loadDataFromServer(function() { filterData(currentRegion); });
-                  }, 500);
-                }
-              }, 1000);
+  try {
+    const { data: item, error: fetchError } = await supabase
+      .from('noise_reports')
+      .select('report_logs, report_count')
+      .eq('id', reportId)
+      .single();
 
-            // 🌟 依照你的需求，未滿 10 次時改變顯示文字
-            } else if (result.status === "updated") {
-              buttonObj.innerText = "✅ 已通報完成";
-              
-            } else {
-              // 順便把後端的錯誤訊息 (result.msg) 印出來，方便我們抓蟲 🐛
-              buttonObj.innerText = "❌ 系統錯誤: " + result.msg;
-              buttonObj.disabled = false;
-            }
-          })
-          // 🔴 失敗安全網：接住網路斷線或 Google 伺服器無回應的球
-          .withFailureHandler(function(error) {
-            buttonObj.innerText = "❌ 網路或伺服器無回應";
-            buttonObj.disabled = false;
-          })
-          .reportItemRemoved(rowIndex);
+    if (fetchError) {
+      throw fetchError;
+    }
+
+    const now = new Date();
+    const nowText = formatDateTime(now);
+    const currentCount = item.report_count || 0;
+    const newCount = currentCount + 1;
+
+    const oldLogs = item.report_logs ? item.report_logs + "\n" : "";
+    const newLogs = oldLogs + nowText + " " + newCount + "/10";
+
+    if (newCount >= 10) {
+      const { error: updateError } = await supabase
+        .from('noise_reports')
+        .update({
+          report_logs: newLogs,
+          report_count: newCount,
+          is_active: false
+        })
+        .eq('id', reportId);
+
+      if (updateError) {
+        throw updateError;
       }
+
+      buttonObj.innerText = "✅ 達標！資料移除中";
+
+      setTimeout(function() {
+        var targetCardBox = document.getElementById('card-box-' + reportId);
+        if (targetCardBox) {
+          targetCardBox.classList.add('fade-out');
+          setTimeout(function() {
+            loadDataFromServer(function() {
+              filterData(currentRegion);
+            });
+          }, 500);
+        }
+      }, 1000);
+
+    } else {
+      const { error: updateError } = await supabase
+        .from('noise_reports')
+        .update({
+          report_logs: newLogs,
+          report_count: newCount
+        })
+        .eq('id', reportId);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      buttonObj.innerText = "✅ 已通報完成";
+    }
+
+  } catch (error) {
+    console.error(error);
+    buttonObj.innerText = "❌ 系統錯誤";
+    buttonObj.disabled = false;
+  }
+}
+
+function formatDateTime(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  const h = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return `${y}/${m}/${d} ${h}:${min}`;
+}
     </script>
   </body>
 </html>
