@@ -905,12 +905,11 @@ async function requestSiteNotification() {
 
       if (result.status === "updated") {
         buttonObj.textContent = "✅ 已通報完成";
+        buttonObj.disabled = true;
+        buttonObj.style.opacity = "0.45";
+      
         localStorage.setItem("bbp_noise_reported_" + reportId, String(Date.now()));
-
-        setTimeout(function () {
-          refreshCurrentRegion();
-        }, 1200);
-
+      
         return;
       }
 
