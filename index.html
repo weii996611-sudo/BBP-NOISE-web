@@ -8,8 +8,82 @@
   <title>BBPATROL 黑箱糾察隊</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  
   <style>
+    .notify-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(6px);
+    }
+    
+    .notify-box {
+      width: 100%;
+      max-width: 340px;
+      background: #050505;
+      border: 1.5px solid #33ffcc;
+      border-radius: 24px;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(51, 255, 204, 0.18);
+    }
+    
+    .notify-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    
+    .notify-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #33ffcc;
+      margin-bottom: 10px;
+    }
+    
+    .notify-text {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #ffffff;
+      margin-bottom: 18px;
+    }
+    
+    .notify-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    
+    .notify-allow-btn,
+    .notify-later-btn {
+      border-radius: 999px;
+      padding: 9px 15px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: 1px solid #33ffcc;
+    }
+    
+    .notify-allow-btn {
+      background: #33ffcc;
+      color: #000000;
+      font-weight: bold;
+    }
+    
+    .notify-later-btn {
+      background: transparent;
+      color: #33ffcc;
+    }
+    
+    .notify-note {
+      color: #777777;
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
     * {
       box-sizing: border-box;
     }
@@ -337,6 +411,24 @@
     <div id="data-screen"></div>
     <div id="loading-text" style="display: none;">資料同步中...</div>
     <div id="no-data" style="display: none;">該區域暫無糾察紀錄</div>
+    <div id="notify-modal" class="notify-modal" style="display: none;">
+        <div class="notify-box">
+          <div class="notify-icon">🔔</div>
+          <div class="notify-title">開啟噪音偵測通知？</div>
+          <div class="notify-text">
+          有新的噪音偵測地點時，第一時間提醒你查看。
+          </div>
+
+          <div class="notify-actions">
+            <button class="notify-allow-btn" onclick="requestSiteNotification()">開啟通知</button>
+            <button class="notify-later-btn" onclick="closeNotifyModal(true)">稍後再說</button>
+          </div>
+
+          <div class="notify-note">
+            iPhone 使用者建議將網站加入主畫面，以獲得較完整通知支援。
+          </div>
+        </div>
+      </div>
   </main>
 
   <script>
@@ -365,6 +457,8 @@
     await loadDataFromServer();
 
     hideLoading();
+
+    scheduleNotifyPrompt();
 
     const params = new URLSearchParams(window.location.search);
     const region = params.get("region");
@@ -414,6 +508,104 @@
 
     return deviceId;
   }
+
+    let notifyPromptTimer = null;
+    let notifyPromptShownThisSession = false;
+    
+    function shouldShowNotifyPrompt() {
+      if (!("Notification" in window)) {
+        return false;
+      }
+    
+      if (Notification.permission === "granted") {
+        return false;
+      }
+    
+      if (Notification.permission === "denied") {
+        return false;
+      }
+    
+      const lastClosedAt = Number(localStorage.getItem("bbp_notify_closed_at") || "0");
+      const threeDays = 3 * 24 * 60 * 60 * 1000;
+    
+      if (lastClosedAt && Date.now() - lastClosedAt < threeDays) {
+        return false;
+      }
+    
+      if (notifyPromptShownThisSession) {
+        return false;
+      }
+    
+      return true;
+    }
+    
+    function showNotifyModal() {
+      if (!shouldShowNotifyPrompt()) {
+        return;
+      }
+    
+      notifyPromptShownThisSession = true;
+    
+      const modal = document.getElementById("notify-modal");
+      if (modal) {
+        modal.style.display = "flex";
+      }
+    }
+    
+    function closeNotifyModal(remember) {
+      const modal = document.getElementById("notify-modal");
+    
+      if (modal) {
+        modal.style.display = "none";
+      }
+    
+      if (remember) {
+        localStorage.setItem("bbp_notify_closed_at", String(Date.now()));
+      }
+    }
+    
+    function scheduleNotifyPrompt() {
+      if (notifyPromptTimer) {
+        return;
+      }
+    
+      notifyPromptTimer = setTimeout(function () {
+        showNotifyModal();
+      }, 5000);
+    }
+    
+    function showNotifyPromptAfterRegionClick() {
+      setTimeout(function () {
+        showNotifyModal();
+      }, 800);
+    }
+
+async function requestSiteNotification() {
+  if (!("Notification" in window)) {
+    alert("目前瀏覽器不支援網站通知。");
+    closeNotifyModal(true);
+    return;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+
+    if (permission === "granted") {
+      localStorage.setItem("bbp_notify_enabled", "true");
+      closeNotifyModal(false);
+
+      new Notification("BBPATROL 通知已開啟", {
+        body: "之後有新的噪音偵測地點時，可提醒你查看。"
+      });
+    } else {
+      closeNotifyModal(true);
+    }
+  } catch (error) {
+    console.error(error);
+    alert("通知權限開啟失敗，請稍後再試。");
+    closeNotifyModal(true);
+  }
+}
 
   async function loadDataFromServer(callback) {
     if (!supabaseClient) {
@@ -495,6 +687,7 @@
       encodeURIComponent(regionName);
 
     window.history.replaceState({}, "", cleanUrl);
+    showNotifyPromptAfterRegionClick();
   }
   function formatCreatedAt(dateString) {
   if (!dateString) return "";
