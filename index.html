@@ -134,6 +134,7 @@
       flex-shrink: 0;
     }
 
+    .notify-header-btn,
     .back-btn,
     .refresh-btn {
       background-color: transparent;
@@ -143,8 +144,15 @@
       padding: 7px 12px;
       font-size: 0.82rem;
       cursor: pointer;
-      display: none;
       white-space: nowrap;
+    }
+    .back-btn,
+    .refresh-btn {
+      display: none;
+    }
+    
+    .notify-header-btn {
+      display: block;
     }
 
     .back-btn:active,
@@ -359,6 +367,7 @@
         font-size: 0.68rem;
       }
 
+      .notify-header-btn,
       .back-btn,
       .refresh-btn {
         padding: 6px 10px;
@@ -396,8 +405,9 @@
     </div>
 
     <div class="header-actions">
+      <button class="notify-header-btn" id="notify-header-btn" onclick="showNotifyModal(true)">🔔接收最新通知</button>
       <button class="back-btn" id="back-btn" onclick="showMenu()">← 返回區域</button>
-      <button class="refresh-btn" id="refresh-btn" onclick="refreshCurrentRegion()">🔄 刷新資料</button>
+      <button class="refresh-btn" id="refresh-btn" onclick="refreshCurrentRegion()">🔄 更新資料</button>
     </div>
   </header>
 
@@ -460,6 +470,8 @@
     await loadDataFromServer();
 
     hideLoading();
+
+    updateNotifyHeaderButton();
 
     scheduleNotifyPrompt();
 
@@ -596,6 +608,7 @@ async function requestSiteNotification() {
     if (permission === "granted") {
       localStorage.setItem("bbp_notify_enabled", "true");
       closeNotifyModal(false);
+      updateNotifyHeaderButton();
 
       new Notification("BBPATROL 通知已開啟", {
         body: "之後有新的噪音偵測地點時，可提醒你查看。"
@@ -609,6 +622,21 @@ async function requestSiteNotification() {
     closeNotifyModal(true);
   }
 }
+  function updateNotifyHeaderButton() {
+    const btn = document.getElementById("notify-header-btn");
+    if (!btn) return;
+
+    if ("Notification" in window && Notification.permission === "granted") {
+      btn.textContent = "🔔 通知已開啟";
+      btn.disabled = true;
+      btn.style.opacity = "0.6";
+      return;
+    }
+  
+    btn.textContent = "🔔 接收通知";
+    btn.disabled = false;
+    btn.style.opacity = "1";
+  } 
 
   async function loadDataFromServer(callback) {
     if (!supabaseClient) {
