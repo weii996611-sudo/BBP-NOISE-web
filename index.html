@@ -552,7 +552,7 @@
 
     <div id="data-screen"></div>
     <div id="loading-text" style="display: none;">[ 系統連線中... ]</div>
-    <div id="no-data" style="display: none;">// 該區域暫無糾察紀錄</div>
+    <div id="no-data" style="display: none;">該區域暫無回報紀錄</div>
 
     <div id="notify-modal" class="notify-modal" style="display: none;">
       <div class="notify-box">
@@ -852,7 +852,7 @@
         removeBtn.disabled = true;
         removeBtn.textContent = "✓ 已送出通報";
       } else {
-        removeBtn.textContent = "🛑 狀況已解除 (撤下)";
+        removeBtn.textContent = "🛑 設備已撤離";
         removeBtn.addEventListener("click", function () { reportWithdraw(removeBtn, item.id); });
       }
 
@@ -970,14 +970,14 @@
         buttonObj.textContent = "⚠️ 無效操作";
         setTimeout(function () {
           buttonObj.disabled = false;
-          buttonObj.textContent = "🛑 狀況已解除 (撤下)";
+          buttonObj.textContent = "🛑 設備已撤離";
         }, 2000);
 
       } catch (error) {
         buttonObj.textContent = "❌ 系統錯誤";
         setTimeout(function () {
           buttonObj.disabled = false;
-          buttonObj.textContent = "🛑 狀況已解除 (撤下)";
+          buttonObj.textContent = "🛑 設備已撤離";
         }, 2000);
       }
     }
