@@ -244,11 +244,14 @@
       align-items: center;
       justify-content: flex-start;
       overflow-x: auto;
+      overflow-y: hidden;
       scroll-snap-type: x mandatory;
+      scroll-behavior: auto;
       height: 100%;
       padding: 24px;
       gap: 24px;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
     }
 
     #data-screen {
@@ -276,7 +279,19 @@
     #data-screen::-webkit-scrollbar-thumb:hover {
       background: linear-gradient(90deg, #2f6bff, #ff2f62);
     }
+    /* 電腦版：降低吸附強度，讓滑鼠滾輪更順 */
+    @media (min-width: 769px) {
+      #data-screen {
+        scroll-snap-type: x proximity;
+      }
+    }
     
+    /* 手機版：保留原本一張一張吸附 */
+    @media (max-width: 768px) {
+      #data-screen {
+        scroll-snap-type: x mandatory;
+      }
+    }
     /* 手機版維持隱藏捲軸 */
     @media (max-width: 768px) {
       #data-screen::-webkit-scrollbar {
@@ -1128,14 +1143,35 @@
       const dataScreen = document.getElementById("data-screen");
       if (!dataScreen) return;
     
-      dataScreen.addEventListener("wheel", function (event) {
-        if (dataScreen.style.display !== "flex") return;
+      let wheelLock = false;
     
-        // 如果是上下滾輪，就轉成左右滑動
-        if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
-          event.preventDefault();
-          dataScreen.scrollLeft += event.deltaY;
-        }
+      dataScreen.addEventListener("wheel", function (event) {
+        if (window.innerWidth <= 768) return;
+    
+        const isVisible = window.getComputedStyle(dataScreen).display === "flex";
+        if (!isVisible) return;
+    
+        const canScrollHorizontally = dataScreen.scrollWidth > dataScreen.clientWidth;
+        if (!canScrollHorizontally) return;
+    
+        event.preventDefault();
+    
+        const delta = Math.abs(event.deltaY) > Math.abs(event.deltaX)
+          ? event.deltaY
+          : event.deltaX;
+    
+        if (wheelLock) return;
+    
+        wheelLock = true;
+    
+        dataScreen.scrollBy({
+          left: delta * 2.2,
+          behavior: "smooth"
+        });
+    
+        setTimeout(function () {
+          wheelLock = false;
+        }, 90);
       }, { passive: false });
     }
     function scrollToCard(reportId) {
