@@ -10,14 +10,29 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+    /* ---------------------------------------------------
+       1. 核心變數設定 (LOGO 配色：黑、白、藍、紅)
+    --------------------------------------------------- */
+    :root {
+      --bg-dark: #030303;        /* 極深黑底 */
+      --card-bg: #0A0A0C;        /* 卡片深灰底 */
+      --tech-blue: #1A56DB;      /* 科技藍 */
+      --tech-blue-glow: rgba(26, 86, 219, 0.2);
+      --tech-red: #E11D48;       /* 警示紅 */
+      --tech-red-glow: rgba(225, 29, 72, 0.2);
+      --tech-white: #FFFFFF;     /* 純白 */
+      --tech-gray: #1F2937;      /* 邊框灰 */
+      --text-muted: #9CA3AF;     /* 次要文字灰 */
+    }
+
     * {
       box-sizing: border-box;
     }
 
     body {
-      background-color: #050505;
-      color: #ffffff;
-      font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--tech-white);
+      font-family: 'PingFang TC', 'Microsoft JhengHei', ui-sans-serif, system-ui, sans-serif;
       margin: 0;
       padding: 0;
       display: flex;
@@ -26,68 +41,80 @@
       overflow: hidden;
     }
 
+    /* ---------------------------------------------------
+       2. 頂部導覽列 (Header)
+    --------------------------------------------------- */
     #header {
-      background-color: #050505;
-      padding: 15px 20px;
+      background-color: var(--bg-dark);
+      padding: 16px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #1a1a1a;
+      border-bottom: 1px solid var(--tech-gray);
       flex-shrink: 0;
       gap: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+    }
+
+    .brand-group {
+      display: flex;
+      flex-direction: column;
     }
 
     .brand-title {
       margin: 0;
-      font-size: 1.35rem;
-      font-weight: bold;
-      letter-spacing: 1px;
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: 2px;
       line-height: 1.1;
+      color: var(--tech-white);
     }
 
     .brand-subtitle {
-      color: #33ffcc;
-      font-size: 0.72rem;
+      color: var(--tech-blue);
+      font-size: 0.75rem;
       text-transform: uppercase;
-      margin-top: 3px;
-      letter-spacing: 0.5px;
+      margin-top: 4px;
+      letter-spacing: 1px;
+      font-weight: 600;
     }
 
     .header-actions {
       display: flex;
-      gap: 8px;
+      gap: 12px;
       align-items: center;
       flex-shrink: 0;
     }
 
+    /* 頂部按鈕統一風格 */
     .notify-header-btn,
     .back-btn,
     .refresh-btn {
       background-color: transparent;
-      color: #33ffcc;
-      border: 1px solid #33ffcc;
-      border-radius: 999px;
-      padding: 7px 12px;
-      font-size: 0.82rem;
+      color: var(--tech-blue);
+      border: 1px solid var(--tech-blue);
+      border-radius: 6px; /* 改為微圓角，更具科技感 */
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
+      transition: all 0.2s ease;
     }
 
-    .notify-header-btn {
-      display: none !important;
-    }
+    .notify-header-btn { display: none !important; }
+    .back-btn, .refresh-btn { display: none; }
 
-    .back-btn,
-    .refresh-btn {
-      display: none;
-    }
-
+    .notify-header-btn:active,
     .back-btn:active,
-    .refresh-btn:active,
-    .notify-header-btn:active {
-      background-color: rgba(51, 255, 204, 0.2);
+    .refresh-btn:active {
+      background-color: var(--tech-blue-glow);
     }
 
+    /* ---------------------------------------------------
+       3. 主選單 (Menu Screen)
+    --------------------------------------------------- */
     #main-wrapper {
       flex: 1;
       position: relative;
@@ -98,16 +125,14 @@
     #menu-screen {
       display: flex;
       flex-direction: column;
+      align-items: center;
       justify-content: center;
-      gap: 22px;
-      padding: 22px 20px 30px;
+      gap: 32px;
+      padding: 20px;
       height: 100%;
       overflow-y: auto;
-      background:
-        radial-gradient(circle at 50% 18%, rgba(51, 255, 204, 0.08), transparent 32%),
-        radial-gradient(circle at 12% 88%, rgba(230, 26, 82, 0.08), transparent 28%),
-        radial-gradient(circle at 88% 88%, rgba(31, 79, 183, 0.09), transparent 30%),
-        #050505;
+      /* 乾淨的背景，只留極微弱的藍光點綴 */
+      background: radial-gradient(circle at 50% 0%, var(--tech-blue-glow), transparent 50%), var(--bg-dark);
     }
 
     .menu-hero {
@@ -117,144 +142,101 @@
       text-align: center;
     }
 
+    /* LOGO 容器極簡化 */
     .menu-logo-card {
       position: relative;
-      width: 154px;
-      height: 154px;
-      border-radius: 36px;
-      background: #ffffff;
-      border: 1px solid rgba(51, 255, 204, 0.35);
+      width: 140px;
+      height: 140px;
+      border-radius: 20px;
+      background: var(--tech-white);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 14px;
-      box-shadow:
-        0 0 0 1px rgba(51, 255, 204, 0.08),
-        0 18px 45px rgba(0, 0, 0, 0.55),
-        0 0 28px rgba(51, 255, 204, 0.08);
-      overflow: hidden;
+      margin-bottom: 20px;
+      border: 2px solid var(--tech-gray);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
     }
-    
-    .menu-logo-glow {
-      display: none;
-    }
-    
+
     .menu-logo {
-      position: relative;
-      z-index: 1;
-      width: 108px;
-      height: 108px;
+      width: 100px;
+      height: 100px;
       object-fit: contain;
-      display: block;
     }
 
     .menu-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: #33ffcc;
-      border: 1px solid rgba(51, 255, 204, 0.45);
-      background: rgba(51, 255, 204, 0.08);
-      border-radius: 999px;
-      padding: 5px 11px;
-      font-size: 0.68rem;
-      letter-spacing: 1.4px;
+      color: var(--tech-white);
+      border: 1px solid var(--tech-blue);
+      background: var(--tech-blue-glow);
+      border-radius: 4px; /* 方正科技感 */
+      padding: 4px 12px;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
       font-weight: 700;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .menu-title {
-      font-size: 1.48rem;
+      font-size: 1.5rem;
       font-weight: 900;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-      background: linear-gradient(90deg, #33ffcc 0%, #ffffff 48%, #e61a52 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+      color: var(--tech-white);
     }
+
+    /* 區域按鈕網格 */
     .region-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap: 16px;
+      width: 100%;
+      max-width: 500px;
     }
 
     .region-btn {
       position: relative;
-      min-height: 84px;
-      background:
-        linear-gradient(145deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012));
-      border: 1px solid rgba(51, 255, 204, 0.78);
-      border-radius: 20px;
-      color: #ffffff;
-      padding: 18px 14px;
+      min-height: 80px;
+      background: var(--card-bg);
+      border: 1px solid var(--tech-gray);
+      border-radius: 12px;
+      color: var(--tech-white);
+      padding: 16px;
       cursor: pointer;
       user-select: none;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 6px;
-      box-shadow:
-        0 0 0 1px rgba(51,255,204,0.06),
-        0 10px 24px rgba(0,0,0,0.36);
-      transition:
-        transform 0.18s ease,
-        box-shadow 0.18s ease,
-        border-color 0.18s ease,
-        background 0.18s ease;
-    }
-
-    .region-btn::before {
-      content: "";
-      position: absolute;
-      top: -35%;
-      right: -35%;
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: rgba(51, 255, 204, 0.08);
-      pointer-events: none;
-    }
-
-    .region-btn:nth-child(2n)::before {
-      background: rgba(31, 79, 183, 0.14);
-    }
-
-    .region-btn:nth-child(3n)::before {
-      background: rgba(230, 26, 82, 0.11);
+      gap: 8px;
+      transition: all 0.2s ease;
     }
 
     .region-name {
-      position: relative;
-      z-index: 1;
-      font-size: 1.14rem;
-      font-weight: 850;
+      font-size: 1.2rem;
+      font-weight: 700;
       letter-spacing: 1px;
     }
 
     .region-arrow {
-      position: relative;
-      z-index: 1;
-      color: #33ffcc;
-      font-size: 0.76rem;
-      opacity: 0.82;
+      color: var(--tech-blue);
+      font-size: 0.8rem;
+      font-weight: 600;
     }
 
     .region-btn:hover {
       transform: translateY(-2px);
-      border-color: #33ffcc;
-      box-shadow:
-        0 0 0 1px rgba(51,255,204,0.12),
-        0 14px 28px rgba(0,0,0,0.42),
-        0 0 18px rgba(51,255,204,0.09);
+      border-color: var(--tech-blue);
+      box-shadow: 0 4px 15px var(--tech-blue-glow);
     }
 
     .region-btn:active {
       transform: scale(0.98);
-      background:
-        linear-gradient(145deg, rgba(51,255,204,0.18), rgba(51,255,204,0.05));
+      background: var(--tech-blue-glow);
     }
 
+    /* ---------------------------------------------------
+       4. 數據頁面 (Data Screen) & 卡片
+    --------------------------------------------------- */
     #data-screen {
       display: none;
       flex-direction: row;
@@ -263,63 +245,70 @@
       overflow-x: auto;
       scroll-snap-type: x mandatory;
       height: 100%;
-      padding: 20px;
-      gap: 20px;
+      padding: 24px;
+      gap: 24px;
       -webkit-overflow-scrolling: touch;
     }
 
-    #data-screen::-webkit-scrollbar {
-      display: none;
-    }
+    #data-screen::-webkit-scrollbar { display: none; }
 
     .bb-card {
-      background-color: #000000;
-      border: 1.5px solid #33ffcc;
-      border-radius: 25px;
-      width: 75vw;
-      max-width: 330px;
-      min-width: 270px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--tech-gray);
+      border-radius: 16px;
+      width: 80vw;
+      max-width: 340px;
+      min-width: 280px;
       flex-shrink: 0;
       scroll-snap-align: center;
-      padding: 20px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      transition:
-        opacity 0.5s ease,
-        transform 0.5s ease,
-        width 0.5s ease,
-        padding 0.5s ease,
-        margin 0.5s ease;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* 卡片頂部的紅藍科技線條點綴 */
+    .bb-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--tech-blue) 0%, var(--tech-red) 100%);
     }
 
     .bb-card.fade-out {
       opacity: 0;
-      transform: scale(0.7);
+      transform: scale(0.8);
       width: 0;
       min-width: 0;
       padding: 0;
       margin: 0;
       border: 0 solid transparent;
-      overflow: hidden;
     }
 
     .bb-title {
-      font-size: 1.25rem;
-      color: #33ffcc;
-      margin-bottom: 12px;
-      font-weight: bold;
+      font-size: 1.2rem;
+      color: var(--tech-white);
+      margin-bottom: 16px;
+      font-weight: 800;
       text-align: center;
+      letter-spacing: 1px;
     }
 
     .image-container {
       width: 100%;
       aspect-ratio: 4 / 3;
-      border-radius: 15px;
+      border-radius: 8px;
       overflow: hidden;
-      margin-bottom: 15px;
-      background-color: #111111;
-      border: 1px solid #1a1a1a;
+      margin-bottom: 16px;
+      background-color: var(--bg-dark);
+      border: 1px solid var(--tech-gray);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -328,241 +317,183 @@
     .image-container img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover; /* 改為 cover 讓地圖填滿更俐落 */
       display: block;
     }
 
     .bb-body {
-      font-size: 0.98rem;
-      line-height: 1.6;
+      font-size: 1rem;
+      line-height: 1.5;
       text-align: center;
-      color: #ffffff;
-      margin-bottom: 12px;
+      color: var(--tech-white);
+      margin-bottom: 8px;
       word-break: break-word;
-      white-space: pre-wrap;
+      font-weight: 500;
     }
 
     .bb-meta {
-      color: #777777;
-      font-size: 0.75rem;
-      margin-bottom: 12px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-bottom: 20px;
       text-align: center;
+      font-family: monospace; /* 時間加上一點科技數據感 */
     }
 
+    /* 卡片按鈕 */
     .card-control-group {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
       width: 100%;
-      align-items: center;
     }
 
     .share-card-btn,
     .remove-card-btn {
-      background-color: #1a1a1a;
-      border-radius: 20px;
-      padding: 8px 15px;
-      font-size: 0.85rem;
+      background-color: transparent;
+      border-radius: 6px;
+      padding: 10px 15px;
+      font-size: 0.9rem;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
-      width: 88%;
+      width: 100%;
       text-align: center;
-      border: 1px solid transparent;
-      color: #ffffff;
     }
 
     .share-card-btn {
-      color: #33ffcc;
-      border-color: #33ffcc;
+      color: var(--tech-blue);
+      border: 1px solid var(--tech-blue);
     }
-
     .share-card-btn:active {
-      background-color: #33ffcc;
-      color: #000000;
+      background-color: var(--tech-blue);
+      color: var(--tech-white);
     }
 
     .remove-card-btn {
-      color: #ff4444;
-      border-color: #ff4444;
+      color: var(--tech-red);
+      border: 1px solid var(--tech-red);
     }
-
     .remove-card-btn:active:not(:disabled) {
-      background-color: #ff4444;
-      color: #ffffff;
+      background-color: var(--tech-red);
+      color: var(--tech-white);
     }
-
     .remove-card-btn:disabled {
       cursor: not-allowed;
-      opacity: 0.45;
+      border-color: var(--tech-gray);
+      color: var(--text-muted);
+      background: transparent;
     }
 
-    #no-data,
-    #loading-text {
+    /* ---------------------------------------------------
+       5. 系統文字與通知 Modal
+    --------------------------------------------------- */
+    #no-data, #loading-text {
       width: 100%;
       text-align: center;
-      color: #555555;
+      color: var(--text-muted);
       font-size: 1rem;
       position: absolute;
       top: 50%;
       left: 0;
       transform: translateY(-50%);
-      padding: 0 20px;
+      letter-spacing: 1px;
     }
 
-    .error-text {
-      color: #ff5555 !important;
-    }
+    .error-text { color: var(--tech-red) !important; }
 
     .notify-modal {
       position: fixed;
       inset: 0;
       z-index: 9999;
-      background: rgba(0, 0, 0, 0.72);
+      background: rgba(0, 0, 0, 0.85);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(4px);
     }
 
     .notify-box {
       width: 100%;
-      max-width: 340px;
-      background: #050505;
-      border: 1.5px solid #33ffcc;
-      border-radius: 24px;
-      padding: 24px 20px;
+      max-width: 320px;
+      background: var(--card-bg);
+      border: 1px solid var(--tech-gray);
+      border-radius: 12px;
+      padding: 24px;
       text-align: center;
-      box-shadow: 0 0 30px rgba(51, 255, 204, 0.18);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      /* 頂部藍線 */
+      border-top: 3px solid var(--tech-blue);
     }
 
-    .notify-icon {
-      font-size: 2rem;
-      margin-bottom: 10px;
-    }
-
+    .notify-icon { font-size: 2rem; margin-bottom: 12px; }
+    
     .notify-title {
-      font-size: 1.25rem;
-      font-weight: bold;
-      color: #33ffcc;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--tech-white);
       margin-bottom: 10px;
     }
 
     .notify-text {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       line-height: 1.6;
-      color: #ffffff;
-      margin-bottom: 18px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
     }
 
     .notify-actions {
       display: flex;
+      flex-direction: column; /* 改為上下排列更乾淨 */
       gap: 10px;
-      justify-content: center;
       margin-bottom: 12px;
     }
 
-    .notify-allow-btn,
-    .notify-later-btn {
-      border-radius: 999px;
-      padding: 9px 15px;
-      font-size: 0.9rem;
+    .notify-allow-btn, .notify-later-btn {
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
       cursor: pointer;
-      border: 1px solid #33ffcc;
+      width: 100%;
     }
 
     .notify-allow-btn {
-      background: #33ffcc;
-      color: #000000;
-      font-weight: bold;
+      background: var(--tech-blue);
+      color: var(--tech-white);
+      border: none;
     }
 
     .notify-later-btn {
       background: transparent;
-      color: #33ffcc;
+      color: var(--text-muted);
+      border: 1px solid var(--tech-gray);
     }
 
     .notify-note {
-      color: #777777;
+      color: #666;
       font-size: 0.75rem;
-      line-height: 1.5;
+      line-height: 1.4;
+      margin-top: 16px;
     }
 
+    /* ---------------------------------------------------
+       6. 響應式微調
+    --------------------------------------------------- */
     @media (max-width: 420px) {
-      #header {
-        padding: 14px 16px;
-      }
-
-      .brand-title {
-        font-size: 1.25rem;
-      }
-
-      .brand-subtitle {
-        font-size: 0.68rem;
-      }
-
-      .notify-header-btn,
-      .back-btn,
-      .refresh-btn {
-        padding: 6px 10px;
-        font-size: 0.78rem;
-      }
-
-      #menu-screen {
-        justify-content: center;
-        padding: 18px 16px 26px;
-        gap: 18px;
-      }
-
+      .brand-title { font-size: 1.2rem; }
+      .brand-subtitle { font-size: 0.65rem; }
+      
       .menu-logo-card {
-        width: 136px;
-        height: 136px;
-        border-radius: 32px;
-        margin-bottom: 12px;
+        width: 120px; height: 120px; margin-bottom: 16px;
       }
-
-      .menu-logo {
-        width: 94px;
-        height: 94px;
-      }
-
-      .menu-badge {
-        font-size: 0.62rem;
-        padding: 4px 10px;
-        margin-bottom: 9px;
-      }
-
-      .menu-title {
-        font-size: 1.28rem;
-      }
-
-      .region-grid {
-        gap: 12px;
-      }
-
-      .region-btn {
-        min-height: 78px;
-        padding: 16px 12px;
-        border-radius: 18px;
-      }
-
-      .region-name {
-        font-size: 1.02rem;
-      }
-
-      .region-arrow {
-        font-size: 0.72rem;
-      }
-
-      #data-screen {
-        padding: 18px;
-        gap: 18px;
-      }
-
-      .bb-card {
-        width: 78vw;
-        min-width: 265px;
-      }
+      .menu-logo { width: 80px; height: 80px; }
+      .menu-title { font-size: 1.3rem; }
+      
+      .region-btn { min-height: 70px; padding: 12px; }
+      .region-name { font-size: 1.1rem; }
+      
+      .bb-card { width: 85vw; padding: 20px; }
     }
   </style>
 </head>
@@ -576,8 +507,8 @@
 
     <div class="header-actions">
       <button class="notify-header-btn" id="notify-header-btn" onclick="showNotifyModal(true)">🔔 接收通知</button>
-      <button class="back-btn" id="back-btn" onclick="showMenu()">← 返回區域</button>
-      <button class="refresh-btn" id="refresh-btn" onclick="refreshCurrentRegion()">🔄 刷新資料</button>
+      <button class="back-btn" id="back-btn" onclick="showMenu()">← 返回</button>
+      <button class="refresh-btn" id="refresh-btn" onclick="refreshCurrentRegion()">🔄 刷新</button>
     </div>
   </header>
 
@@ -585,68 +516,59 @@
     <div id="menu-screen">
       <div class="menu-hero">
         <div class="menu-logo-card">
-          <div class="menu-logo-glow"></div>
-          <img src="LOGO2.png" alt="BBPATROL 噪音偵測 Logo" class="menu-logo">
+          <img src="LOGO2.png" alt="BBPATROL Logo" class="menu-logo">
         </div>
-
-        <div class="menu-badge">NOISE DETECTION MAP</div>
-
+        <div class="menu-badge">SYS. MAP</div>
         <div class="menu-title">噪音偵測地點</div>
-
       </div>
 
       <div class="region-grid">
         <div class="region-btn" onclick="filterData('北北基')">
           <span class="region-name">北北基</span>
-          <span class="region-arrow">查看 →</span>
+          <span class="region-arrow">查閱數據 &gt;</span>
         </div>
-
         <div class="region-btn" onclick="filterData('桃竹苗')">
           <span class="region-name">桃竹苗</span>
-          <span class="region-arrow">查看 →</span>
+          <span class="region-arrow">查閱數據 &gt;</span>
         </div>
-
         <div class="region-btn" onclick="filterData('中彰投')">
           <span class="region-name">中彰投</span>
-          <span class="region-arrow">查看 →</span>
+          <span class="region-arrow">查閱數據 &gt;</span>
         </div>
-
         <div class="region-btn" onclick="filterData('雲嘉南')">
           <span class="region-name">雲嘉南</span>
-          <span class="region-arrow">查看 →</span>
+          <span class="region-arrow">查閱數據 &gt;</span>
         </div>
-
         <div class="region-btn" onclick="filterData('高屏')">
           <span class="region-name">高屏</span>
-          <span class="region-arrow">查看 →</span>
+          <span class="region-arrow">查閱數據 &gt;</span>
         </div>
-
         <div class="region-btn" onclick="filterData('宜花東')">
           <span class="region-name">宜花東</span>
-          <span class="region-arrow">查看 →</span>
+          <span class="region-arrow">查閱數據 &gt;</span>
         </div>
       </div>
     </div>
 
     <div id="data-screen"></div>
-    <div id="loading-text" style="display: none;">資料同步中...</div>
-    <div id="no-data" style="display: none;">該區域暫無糾察紀錄</div>
+    <div id="loading-text" style="display: none;">[ 系統連線中... ]</div>
+    <div id="no-data" style="display: none;">// 該區域暫無糾察紀錄</div>
 
     <div id="notify-modal" class="notify-modal" style="display: none;">
       <div class="notify-box">
         <div class="notify-icon">🔔</div>
-        <div class="notify-title">開啟噪音偵測通知？</div>
+        <div class="notify-title">開啟系統通知？</div>
         <div class="notify-text">
-          有新的噪音偵測地點時，第一時間提醒你查看。
+          當有新的噪音熱點回報時，系統將第一時間推播給您。
         </div>
 
         <div class="notify-actions">
-          <button class="notify-allow-btn" onclick="requestSiteNotification()">開啟通知</button>
+          <button class="notify-allow-btn" onclick="requestSiteNotification()">允許通知</button>
           <button class="notify-later-btn" onclick="closeNotifyModal(true)">稍後再說</button>
         </div>
 
         <div class="notify-note">
-          若手機無法開啟通知，請使用 Chrome / Safari 開啟；iPhone 建議將網站加入主畫面。
+          * iOS 用戶請使用 Safari 開啟，並建議將本頁面加入主畫面。
         </div>
       </div>
     </div>
@@ -655,7 +577,6 @@
   <script>
     const SUPABASE_URL = "https://sadnhsddereuhpfvdquk.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_k_u54EP-ZibEk5ABR2_lQA__c41LUZI";
-
     const REGION_LIST = ["北北基", "桃竹苗", "中彰投", "雲嘉南", "高屏", "宜花東"];
 
     let allData = [];
@@ -665,29 +586,23 @@
     let notifyPromptShownThisSession = false;
 
     if (window.supabase && window.supabase.createClient) {
-      supabaseClient = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-      );
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } else {
       console.error("Supabase CDN 載入失敗");
     }
 
     window.addEventListener("load", async function () {
       getDeviceId();
-      showLoading("資料同步中...");
+      showLoading("[ 系統連線同步中... ]");
 
       const params = new URLSearchParams(window.location.search);
-
       if (params.get("resetNotify") === "1") {
         localStorage.removeItem("bbp_notify_closed_at");
         localStorage.removeItem("bbp_notify_enabled");
       }
 
       await loadDataFromServer();
-
       hideLoading();
-
       updateNotifyHeaderButton();
       scheduleNotifyPrompt();
 
@@ -696,11 +611,8 @@
 
       if (region && REGION_LIST.includes(region)) {
         filterData(region);
-
         if (id) {
-          setTimeout(function () {
-            scrollToCard(id);
-          }, 300);
+          setTimeout(function () { scrollToCard(id); }, 300);
         }
       }
     });
@@ -708,14 +620,14 @@
     function showLoading(text) {
       const loadingText = document.getElementById("loading-text");
       loadingText.classList.remove("error-text");
-      loadingText.textContent = text || "資料同步中...";
+      loadingText.textContent = text || "[ 系統連線中... ]";
       loadingText.style.display = "block";
     }
 
     function showError(text) {
       const loadingText = document.getElementById("loading-text");
       loadingText.classList.add("error-text");
-      loadingText.textContent = text || "資料讀取失敗";
+      loadingText.textContent = text || "連線失敗";
       loadingText.style.display = "block";
     }
 
@@ -725,78 +637,42 @@
 
     function getDeviceId() {
       let deviceId = localStorage.getItem("bbp_noise_device_id");
-
       if (!deviceId) {
-        deviceId =
-          "dev_" +
-          Date.now().toString(36) +
-          "_" +
-          Math.random().toString(36).slice(2, 12);
-
+        deviceId = "dev_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 12);
         localStorage.setItem("bbp_noise_device_id", deviceId);
       }
-
       return deviceId;
     }
 
     function shouldShowNotifyPrompt() {
-      if (notifyPromptShownThisSession) {
-        return false;
-      }
-
+      if (notifyPromptShownThisSession) return false;
       const lastClosedAt = Number(localStorage.getItem("bbp_notify_closed_at") || "0");
       const threeDays = 3 * 24 * 60 * 60 * 1000;
-
-      if (lastClosedAt && Date.now() - lastClosedAt < threeDays) {
-        return false;
-      }
-
-      if ("Notification" in window && Notification.permission === "granted") {
-        return false;
-      }
-
+      if (lastClosedAt && Date.now() - lastClosedAt < threeDays) return false;
+      if ("Notification" in window && Notification.permission === "granted") return false;
       return true;
     }
 
     function showNotifyModal(forceShow) {
-      if (!forceShow && !shouldShowNotifyPrompt()) {
-        return;
-      }
-
+      if (!forceShow && !shouldShowNotifyPrompt()) return;
       notifyPromptShownThisSession = true;
-
       const modal = document.getElementById("notify-modal");
-      if (modal) {
-        modal.style.display = "flex";
-      }
+      if (modal) modal.style.display = "flex";
     }
 
     function closeNotifyModal(remember) {
       const modal = document.getElementById("notify-modal");
-
-      if (modal) {
-        modal.style.display = "none";
-      }
-
-      if (remember) {
-        localStorage.setItem("bbp_notify_closed_at", String(Date.now()));
-      }
+      if (modal) modal.style.display = "none";
+      if (remember) localStorage.setItem("bbp_notify_closed_at", String(Date.now()));
     }
 
     function scheduleNotifyPrompt() {
-      if (notifyPromptTimer) {
-        return;
-      }
-
-      notifyPromptTimer = setTimeout(function () {
-        showNotifyModal();
-      }, 7000);
+      if (notifyPromptTimer) return;
+      notifyPromptTimer = setTimeout(function () { showNotifyModal(); }, 7000);
     }
 
     function showNotifyPromptAfterRegionClick() {
-      setTimeout(function () {
-        showNotifyModal();
-      }, 800);
+      setTimeout(function () { showNotifyModal(); }, 800);
     }
 
     async function requestSiteNotification() {
@@ -805,34 +681,25 @@
         closeNotifyModal(true);
         return;
       }
-
       if (Notification.permission === "denied") {
         alert("你已封鎖網站通知。若要開啟，請到瀏覽器設定中重新允許通知。");
         closeNotifyModal(true);
         return;
       }
-
       try {
         const permission = await Notification.requestPermission();
-
         if (permission === "granted") {
           localStorage.setItem("bbp_notify_enabled", "true");
           closeNotifyModal(false);
           updateNotifyHeaderButton();
-
           try {
-            new Notification("BBPATROL 通知已開啟", {
-              body: "之後有新的噪音偵測地點時，可提醒你查看。"
-            });
-          } catch (notifyError) {
-            console.warn(notifyError);
-          }
+            new Notification("BBPATROL 系統連線成功", { body: "當有新的測速/噪音熱點時，將自動推播通知。" });
+          } catch (e) {}
         } else {
           closeNotifyModal(true);
         }
       } catch (error) {
-        console.error(error);
-        alert("通知權限開啟失敗。請改用 Chrome / Safari，或將網頁加入主畫面後再試。");
+        alert("通知權限開啟失敗，請稍後再試。");
         closeNotifyModal(true);
       }
     }
@@ -840,14 +707,14 @@
     function updateNotifyHeaderButton() {
       const btn = document.getElementById("notify-header-btn");
       if (!btn) return;
-
       if ("Notification" in window && Notification.permission === "granted") {
         btn.textContent = "🔔 通知已開啟";
         btn.disabled = true;
-        btn.style.opacity = "0.6";
+        btn.style.opacity = "0.4";
+        btn.style.borderColor = "var(--tech-gray)";
+        btn.style.color = "var(--tech-white)";
         return;
       }
-
       btn.textContent = "🔔 接收通知";
       btn.disabled = false;
       btn.style.opacity = "1";
@@ -855,23 +722,19 @@
 
     function formatCreatedAt(dateString) {
       if (!dateString) return "";
-
       const date = new Date(dateString);
-
       const y = date.getFullYear();
       const m = String(date.getMonth() + 1).padStart(2, "0");
       const d = String(date.getDate()).padStart(2, "0");
-
       return `${y}-${m}-${d}`;
     }
 
     async function loadDataFromServer(callback) {
       if (!supabaseClient) {
         allData = [];
-        showError("Supabase 尚未成功連線，請檢查 CDN、URL、anon key。");
+        showError("資料庫連線失敗，請檢查系統參數。");
         return;
       }
-
       try {
         const { data, error } = await supabaseClient
           .from("noise_reports")
@@ -879,9 +742,7 @@
           .eq("is_active", true)
           .order("created_at", { ascending: false });
 
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
 
         allData = (data || []).map(function (item) {
           return {
@@ -896,19 +757,15 @@
           };
         });
 
-        if (typeof callback === "function") {
-          callback();
-        }
+        if (typeof callback === "function") callback();
       } catch (error) {
-        console.error(error);
         allData = [];
-        showError("資料讀取失敗：" + error.message);
+        showError("系統異常：" + error.message);
       }
     }
 
     function filterData(regionName) {
       currentRegion = regionName;
-
       const dataScreen = document.getElementById("data-screen");
       const noData = document.getElementById("no-data");
 
@@ -924,7 +781,6 @@
           const cardElement = createCardElement(item, index + 1, regionName);
           dataScreen.appendChild(cardElement);
         });
-
         dataScreen.style.display = "flex";
         noData.style.display = "none";
       } else {
@@ -936,14 +792,7 @@
       document.getElementById("back-btn").style.display = "block";
       document.getElementById("refresh-btn").style.display = "block";
 
-      const cleanUrl =
-        window.location.protocol +
-        "//" +
-        window.location.host +
-        window.location.pathname +
-        "?region=" +
-        encodeURIComponent(regionName);
-
+      const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?region=" + encodeURIComponent(regionName);
       window.history.replaceState({}, "", cleanUrl);
 
       showNotifyPromptAfterRegionClick();
@@ -956,22 +805,17 @@
 
       const title = document.createElement("div");
       title.className = "bb-title";
-      title.textContent = "糾察紀錄 #" + cardNumber;
+      title.textContent = "紀錄檔 #" + cardNumber;
       card.appendChild(title);
 
       if (item.imageUrl && item.imageUrl.trim() !== "") {
         const imageContainer = document.createElement("div");
         imageContainer.className = "image-container";
-
         const img = document.createElement("img");
         img.src = item.imageUrl;
-        img.alt = "BBPATROL 噪音偵測紀錄圖片";
+        img.alt = "系統快照";
         img.loading = "lazy";
-
-        img.onerror = function () {
-          imageContainer.style.display = "none";
-        };
-
+        img.onerror = function () { imageContainer.style.display = "none"; };
         imageContainer.appendChild(img);
         card.appendChild(imageContainer);
       }
@@ -983,10 +827,8 @@
 
       const meta = document.createElement("div");
       meta.className = "bb-meta";
-
       const createdTime = formatCreatedAt(item.createdAt);
-      meta.textContent = createdTime ? "發布時間：" + createdTime : "";
-
+      meta.textContent = createdTime ? "T: " + createdTime : "";
       card.appendChild(meta);
 
       const controls = document.createElement("div");
@@ -996,9 +838,7 @@
       shareBtn.className = "share-card-btn";
       shareBtn.type = "button";
       shareBtn.textContent = "🔗 分享此紀錄";
-      shareBtn.addEventListener("click", function () {
-        shareCard(shareBtn, regionName, item.id);
-      });
+      shareBtn.addEventListener("click", function () { shareCard(shareBtn, regionName, item.id); });
 
       const removeBtn = document.createElement("button");
       removeBtn.className = "remove-card-btn";
@@ -1010,17 +850,14 @@
 
       if (isCoolingDown) {
         removeBtn.disabled = true;
-        removeBtn.textContent = "✅ 已通報";
+        removeBtn.textContent = "✓ 已送出通報";
       } else {
-        removeBtn.textContent = "🛑 通報已撤走";
-        removeBtn.addEventListener("click", function () {
-          reportWithdraw(removeBtn, item.id);
-        });
+        removeBtn.textContent = "🛑 狀況已解除 (撤下)";
+        removeBtn.addEventListener("click", function () { reportWithdraw(removeBtn, item.id); });
       }
 
       controls.appendChild(shareBtn);
       controls.appendChild(removeBtn);
-
       card.appendChild(controls);
 
       return card;
@@ -1028,93 +865,61 @@
 
     function showMenu() {
       currentRegion = "";
-
       document.getElementById("menu-screen").style.display = "flex";
       document.getElementById("data-screen").style.display = "none";
       document.getElementById("no-data").style.display = "none";
       document.getElementById("back-btn").style.display = "none";
       document.getElementById("refresh-btn").style.display = "none";
       hideLoading();
-
-      const cleanUrl =
-        window.location.protocol +
-        "//" +
-        window.location.host +
-        window.location.pathname;
-
+      const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
       window.history.replaceState({}, "", cleanUrl);
     }
 
     async function refreshCurrentRegion() {
-      if (!currentRegion) {
-        return;
-      }
-
+      if (!currentRegion) return;
       const dataScreen = document.getElementById("data-screen");
       const noData = document.getElementById("no-data");
-
       noData.style.display = "none";
       dataScreen.style.display = "none";
       dataScreen.innerHTML = "";
-
-      showLoading("數據即時同步中...");
-
-      await loadDataFromServer(function () {
-        filterData(currentRegion);
-      });
+      showLoading("[ 數據即時同步中... ]");
+      await loadDataFromServer(function () { filterData(currentRegion); });
     }
 
     async function shareCard(buttonObj, region, reportId) {
-      const baseUrl =
-        window.location.protocol +
-        "//" +
-        window.location.host +
-        window.location.pathname;
-
-      const shareUrl =
-        baseUrl +
-        "?region=" +
-        encodeURIComponent(region) +
-        "&id=" +
-        encodeURIComponent(reportId);
+      const baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+      const shareUrl = baseUrl + "?region=" + encodeURIComponent(region) + "&id=" + encodeURIComponent(reportId);
 
       try {
         if (navigator.share) {
-          await navigator.share({
-            title: "BBPATROL 噪音偵測紀錄",
-            text: "查看此噪音偵測紀錄",
-            url: shareUrl
-          });
+          await navigator.share({ title: "BBPATROL 系統紀錄", text: "查閱此偵測紀錄", url: shareUrl });
           return;
         }
-
         await navigator.clipboard.writeText(shareUrl);
         showShareSuccess(buttonObj);
       } catch (error) {
-        console.warn(error);
-
         try {
           await navigator.clipboard.writeText(shareUrl);
           showShareSuccess(buttonObj);
         } catch (copyError) {
-          alert("分享連結複製失敗，請手動複製網址列連結。");
+          alert("連結複製失敗。");
         }
       }
     }
 
+    // 狀態顏色修改為對應的科技藍
     function showShareSuccess(buttonObj) {
       const oldText = buttonObj.textContent;
-
-      buttonObj.textContent = "✅ 已複製到剪貼簿";
-      buttonObj.style.borderColor = "#33ffcc";
-      buttonObj.style.color = "#000000";
-      buttonObj.style.backgroundColor = "#33ffcc";
+      buttonObj.textContent = "✓ 已複製連結";
+      buttonObj.style.borderColor = "var(--tech-blue)";
+      buttonObj.style.color = "var(--tech-white)";
+      buttonObj.style.backgroundColor = "var(--tech-blue)";
 
       setTimeout(function () {
         buttonObj.textContent = oldText || "🔗 分享此紀錄";
-        buttonObj.style.borderColor = "#33ffcc";
-        buttonObj.style.color = "#33ffcc";
-        buttonObj.style.backgroundColor = "#1a1a1a";
+        buttonObj.style.borderColor = "var(--tech-blue)";
+        buttonObj.style.color = "var(--tech-blue)";
+        buttonObj.style.backgroundColor = "transparent";
       }, 2000);
     }
 
@@ -1125,98 +930,62 @@
       }
 
       const deviceId = getDeviceId();
-
       buttonObj.disabled = true;
-      buttonObj.textContent = "⏳ 處理中...";
+      buttonObj.textContent = "⏳ 訊號傳輸中...";
 
       try {
-        const { data, error } = await supabaseClient.rpc("report_noise_withdraw", {
-          p_report_id: reportId,
-          p_device_id: deviceId
-        });
-
-        if (error) {
-          throw error;
-        }
-
+        const { data, error } = await supabaseClient.rpc("report_noise_withdraw", { p_report_id: reportId, p_device_id: deviceId });
+        if (error) throw error;
         const result = data || {};
 
-        if (result.status === "cooldown") {
-          buttonObj.textContent = "✅ 已通報";
-          buttonObj.disabled = true;
-          buttonObj.style.opacity = "0.45";
-          localStorage.setItem("bbp_noise_reported_" + reportId, String(Date.now()));
-          return;
-        }
-
-        if (result.status === "updated") {
-          buttonObj.textContent = "✅ 已通報完成";
-          buttonObj.disabled = true;
-          buttonObj.style.opacity = "0.45";
+        if (result.status === "cooldown" || result.status === "updated") {
+          buttonObj.textContent = "✓ 已送出通報";
           localStorage.setItem("bbp_noise_reported_" + reportId, String(Date.now()));
           return;
         }
 
         if (result.status === "deleted") {
-          buttonObj.textContent = "✅ 達標，資料下架中";
+          buttonObj.textContent = "✓ 狀況解除，下架中";
           localStorage.setItem("bbp_noise_reported_" + reportId, String(Date.now()));
-
           setTimeout(function () {
             const targetCardBox = document.getElementById("card-box-" + reportId);
-
             if (targetCardBox) {
               targetCardBox.classList.add("fade-out");
-
               setTimeout(async function () {
-                await loadDataFromServer(function () {
-                  filterData(currentRegion);
-                });
-              }, 550);
+                await loadDataFromServer(function () { filterData(currentRegion); });
+              }, 400);
             } else {
               refreshCurrentRegion();
             }
-          }, 800);
-
+          }, 600);
           return;
         }
 
         if (result.status === "not_found") {
-          buttonObj.textContent = "⚠️ 已下架或不存在";
-
-          setTimeout(function () {
-            refreshCurrentRegion();
-          }, 1200);
-
+          buttonObj.textContent = "⚠️ 紀錄已不存在";
+          setTimeout(function () { refreshCurrentRegion(); }, 1000);
           return;
         }
 
-        buttonObj.textContent = "⚠️ 無法通報";
-
+        buttonObj.textContent = "⚠️ 無效操作";
         setTimeout(function () {
           buttonObj.disabled = false;
-          buttonObj.textContent = "🛑 通報已撤走";
+          buttonObj.textContent = "🛑 狀況已解除 (撤下)";
         }, 2000);
 
       } catch (error) {
-        console.error(error);
         buttonObj.textContent = "❌ 系統錯誤";
-
         setTimeout(function () {
           buttonObj.disabled = false;
-          buttonObj.textContent = "🛑 通報已撤走";
-        }, 2200);
+          buttonObj.textContent = "🛑 狀況已解除 (撤下)";
+        }, 2000);
       }
     }
 
     function scrollToCard(reportId) {
       const targetCard = document.getElementById("card-box-" + reportId);
-
       if (targetCard) {
-        targetCard.scrollIntoView({
-          behavior: "smooth",
-          inline: "center",
-          block: "nearest"
-        });
+        targetCard.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
       }
     }
   </script>
