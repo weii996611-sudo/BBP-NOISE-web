@@ -238,6 +238,48 @@
     /* ---------------------------------------------------
        4. 數據頁面 (Data Screen) & 卡片
     --------------------------------------------------- */
+    #area-filter-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 18px;
+      z-index: 6;
+      display: none;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 0 24px 10px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    
+    #area-filter-bar::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .area-filter-btn {
+      flex: 0 0 auto;
+      background: rgba(10, 10, 12, 0.92);
+      color: var(--tech-white);
+      border: 1px solid var(--tech-gray);
+      border-radius: 999px;
+      padding: 9px 16px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+      transition: all 0.2s ease;
+    }
+    
+    .area-filter-btn.active {
+      color: var(--tech-white);
+      border-color: var(--tech-blue);
+      background: linear-gradient(135deg, var(--tech-blue), var(--tech-red));
+    }
+    
+    .area-filter-btn:active {
+      transform: scale(0.96);
+    }
     #data-screen {
       display: none;
       flex-direction: row;
@@ -246,9 +288,8 @@
       overflow-x: auto;
       overflow-y: hidden;
       scroll-snap-type: x mandatory;
-      scroll-behavior: auto;
       height: 100%;
-      padding: 24px;
+      padding: 24px 24px 110px;
       gap: 24px;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
@@ -560,6 +601,15 @@
       .brand-subtitle {
         font-size: 0.65rem;
       }
+      #area-filter-bar {
+        bottom: calc(18px + env(safe-area-inset-bottom));
+        padding: 0 18px 10px;
+      }
+      
+      .area-filter-btn {
+        padding: 8px 14px;
+        font-size: 0.86rem;
+      }
     
       #menu-screen {
         justify-content: flex-start;
@@ -672,6 +722,7 @@
     </div>
 
     <div id="data-screen"></div>
+    <div id="area-filter-bar" style="display: none;"></div>
     <div id="loading-text" style="display: none;">[ 系統連線中... ]</div>
     <div id="no-data" style="display: none;">該區域暫無回報紀錄</div>
 
@@ -702,6 +753,7 @@
 
     let allData = [];
     let currentRegion = "";
+    let currentAreaFilter = "";
     let supabaseClient = null;
     let notifyPromptTimer = null;
     let notifyPromptShownThisSession = false;
@@ -886,6 +938,55 @@
     
       return rawText;
     }
+    function renderAreaFilterButtons(regionItems, activeArea) {
+      const bar = document.getElementById("area-filter-bar");
+      if (!bar) return;
+    
+      const areaList = [];
+      const areaSet = new Set();
+    
+      regionItems.forEach(function (item) {
+        const area = getAreaTitle(item.text);
+    
+        if (area && !areaSet.has(area)) {
+          areaSet.add(area);
+          areaList.push(area);
+        }
+      });
+    
+      if (areaList.length <= 1) {
+        bar.innerHTML = "";
+        bar.style.display = "none";
+        return;
+      }
+    
+      bar.innerHTML = "";
+    
+      const allBtn = document.createElement("button");
+      allBtn.className = "area-filter-btn" + (!activeArea ? " active" : "");
+      allBtn.type = "button";
+      allBtn.textContent = "全部";
+      allBtn.addEventListener("click", function () {
+        filterData(currentRegion, "");
+      });
+    
+      bar.appendChild(allBtn);
+    
+      areaList.forEach(function (area) {
+        const btn = document.createElement("button");
+        btn.className = "area-filter-btn" + (activeArea === area ? " active" : "");
+        btn.type = "button";
+        btn.textContent = area;
+    
+        btn.addEventListener("click", function () {
+          filterData(currentRegion, area);
+        });
+    
+        bar.appendChild(btn);
+      });
+    
+      bar.style.display = "flex";
+    }
 
     async function loadDataFromServer(callback) {
       if (!supabaseClient) {
@@ -922,37 +1023,55 @@
       }
     }
 
-    function filterData(regionName) {
+    function filterData(regionName, areaFilter = "") {
       currentRegion = regionName;
+      currentAreaFilter = areaFilter;
+    
       const dataScreen = document.getElementById("data-screen");
       const noData = document.getElementById("no-data");
-
+    
       dataScreen.innerHTML = "";
       hideLoading();
-
-      const filtered = allData.filter(function (item) {
+    
+      const regionItems = allData.filter(function (item) {
         return String(item.region).trim() === regionName;
       });
-
+    
+      renderAreaFilterButtons(regionItems, areaFilter);
+    
+      const filtered = areaFilter
+        ? regionItems.filter(function (item) {
+            return getAreaTitle(item.text) === areaFilter;
+          })
+        : regionItems;
+    
       if (filtered.length > 0) {
         filtered.forEach(function (item, index) {
           const cardElement = createCardElement(item, index + 1, regionName);
           dataScreen.appendChild(cardElement);
         });
+    
         dataScreen.style.display = "flex";
         noData.style.display = "none";
       } else {
         dataScreen.style.display = "none";
         noData.style.display = "block";
       }
-
+    
       document.getElementById("menu-screen").style.display = "none";
       document.getElementById("back-btn").style.display = "block";
       document.getElementById("refresh-btn").style.display = "block";
-
-      const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?region=" + encodeURIComponent(regionName);
+    
+      const cleanUrl =
+        window.location.protocol +
+        "//" +
+        window.location.host +
+        window.location.pathname +
+        "?region=" +
+        encodeURIComponent(regionName);
+    
       window.history.replaceState({}, "", cleanUrl);
-
+    
       showNotifyPromptAfterRegionClick();
     }
 
@@ -1028,6 +1147,10 @@
       document.getElementById("no-data").style.display = "none";
       document.getElementById("back-btn").style.display = "none";
       document.getElementById("refresh-btn").style.display = "none";
+      const areaFilterBar = document.getElementById("area-filter-bar");
+      if (areaFilterBar) {
+        areaFilterBar.style.display = "none";
+      }
       hideLoading();
       const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
       window.history.replaceState({}, "", cleanUrl);
@@ -1041,7 +1164,9 @@
       dataScreen.style.display = "none";
       dataScreen.innerHTML = "";
       showLoading("[ 數據即時同步中... ]");
-      await loadDataFromServer(function () { filterData(currentRegion); });
+      await loadDataFromServer(function () {
+        filterData(currentRegion, currentAreaFilter);
+      });
     }
 
     async function shareCard(buttonObj, region, reportId) {
