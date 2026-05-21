@@ -251,7 +251,38 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    #data-screen::-webkit-scrollbar { display: none; }
+    #data-screen {
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      scroll-behavior: smooth;
+    }
+    
+    /* 電腦版顯示橫向捲軸 */
+    #data-screen::-webkit-scrollbar {
+      display: block;
+      height: 10px;
+    }
+    
+    #data-screen::-webkit-scrollbar-track {
+      background: #050505;
+    }
+    
+    #data-screen::-webkit-scrollbar-thumb {
+      background: linear-gradient(90deg, var(--tech-blue), var(--tech-red));
+      border-radius: 999px;
+    }
+    
+    #data-screen::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(90deg, #2f6bff, #ff2f62);
+    }
+    
+    /* 手機版維持隱藏捲軸 */
+    @media (max-width: 768px) {
+      #data-screen::-webkit-scrollbar {
+        display: none;
+      }
+    }
 
     .bb-card {
       /* 1. 簡化背景與邊框色調：採用高級灰色調 */
@@ -680,6 +711,7 @@
       hideLoading();
       updateNotifyHeaderButton();
       scheduleNotifyPrompt();
+      enableDesktopHorizontalWheel();
 
       const region = params.get("region");
       const id = params.get("id");
@@ -1092,7 +1124,20 @@
         }, 2000);
       }
     }
-
+    function enableDesktopHorizontalWheel() {
+      const dataScreen = document.getElementById("data-screen");
+      if (!dataScreen) return;
+    
+      dataScreen.addEventListener("wheel", function (event) {
+        if (dataScreen.style.display !== "flex") return;
+    
+        // 如果是上下滾輪，就轉成左右滑動
+        if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+          event.preventDefault();
+          dataScreen.scrollLeft += event.deltaY;
+        }
+      }, { passive: false });
+    }
     function scrollToCard(reportId) {
       const targetCard = document.getElementById("card-box-" + reportId);
       if (targetCard) {
