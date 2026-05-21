@@ -961,15 +961,19 @@
       if (!bar) return;
     
       const areaList = [];
-      const areaSet = new Set();
+      const areaCountMap = {};
     
       regionItems.forEach(function (item) {
         const area = getAreaTitle(item.text);
     
-        if (area && !areaSet.has(area)) {
-          areaSet.add(area);
+        if (!area) return;
+    
+        if (!areaCountMap[area]) {
+          areaCountMap[area] = 0;
           areaList.push(area);
         }
+    
+        areaCountMap[area]++;
       });
     
       if (areaList.length <= 1) {
@@ -984,6 +988,7 @@
       allBtn.className = "area-filter-btn" + (!activeArea ? " active" : "");
       allBtn.type = "button";
       allBtn.textContent = "全部";
+    
       allBtn.addEventListener("click", function () {
         filterData(currentRegion, "");
       });
@@ -991,10 +996,13 @@
       bar.appendChild(allBtn);
     
       areaList.forEach(function (area) {
+        const count = areaCountMap[area] || 0;
+        const displayText = count > 1 ? area + count : area;
+    
         const btn = document.createElement("button");
         btn.className = "area-filter-btn" + (activeArea === area ? " active" : "");
         btn.type = "button";
-        btn.textContent = area;
+        btn.textContent = displayText;
     
         btn.addEventListener("click", function () {
           filterData(currentRegion, area);
