@@ -931,7 +931,7 @@
 
       const deviceId = getDeviceId();
       buttonObj.disabled = true;
-      buttonObj.textContent = "⏳ 訊號傳輸中...";
+      buttonObj.textContent = "⏳ 回報中...";
 
       try {
         const { data, error } = await supabaseClient.rpc("report_noise_withdraw", { p_report_id: reportId, p_device_id: deviceId });
