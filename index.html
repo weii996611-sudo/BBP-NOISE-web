@@ -254,9 +254,11 @@
     #data-screen::-webkit-scrollbar { display: none; }
 
     .bb-card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--tech-gray);
-      border-radius: 16px;
+      background:
+        linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+        linear-gradient(135deg, var(--tech-blue) 0%, var(--tech-red) 100%) border-box;
+      border: 2px solid transparent;
+      border-radius: 18px;
       width: 80vw;
       max-width: 340px;
       min-width: 280px;
@@ -269,7 +271,10 @@
       position: relative;
       overflow: hidden;
       transition: all 0.4s ease;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.55),
+        0 0 18px rgba(26, 86, 219, 0.22),
+        0 0 14px rgba(225, 29, 72, 0.14);
     }
 
     /* 卡片頂部的紅藍科技線條點綴 */
