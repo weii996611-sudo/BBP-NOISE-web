@@ -38,6 +38,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      height: 100dvh;
       overflow: hidden;
     }
 
@@ -481,19 +482,68 @@
        6. 響應式微調
     --------------------------------------------------- */
     @media (max-width: 420px) {
-      .brand-title { font-size: 1.2rem; }
-      .brand-subtitle { font-size: 0.65rem; }
-      
-      .menu-logo-card {
-        width: 120px; height: 120px; margin-bottom: 16px;
+      .brand-title {
+        font-size: 1.2rem;
       }
-      .menu-logo { width: 80px; height: 80px; }
-      .menu-title { font-size: 1.3rem; }
-      
-      .region-btn { min-height: 70px; padding: 12px; }
-      .region-name { font-size: 1.1rem; }
-      
-      .bb-card { width: 85vw; padding: 20px; }
+    
+      .brand-subtitle {
+        font-size: 0.65rem;
+      }
+    
+      #menu-screen {
+        justify-content: flex-start;
+        padding-top: 48px;
+        padding-bottom: calc(110px + env(safe-area-inset-bottom));
+      }
+    
+      .menu-hero {
+        margin-bottom: 4px;
+      }
+    
+      .menu-logo-card {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 16px;
+      }
+    
+      .menu-logo {
+        width: 80px;
+        height: 80px;
+      }
+    
+      .menu-title {
+        font-size: 1.3rem;
+      }
+    
+      .region-grid {
+        padding-bottom: 20px;
+      }
+    
+      .region-btn {
+        min-height: 70px;
+        padding: 12px;
+      }
+    
+      .region-name {
+        font-size: 1.1rem;
+      }
+    
+      #data-screen {
+        align-items: flex-start;
+        padding-top: 42px;
+        padding-bottom: calc(110px + env(safe-area-inset-bottom));
+      }
+    
+      .bb-card {
+        width: 85vw;
+        padding: 20px;
+        transform: translateY(-10px);
+      }
+    
+      .bb-title {
+        font-size: 1.85rem;
+        letter-spacing: 1.5px;
+      }
     }
   </style>
 </head>
