@@ -728,6 +728,42 @@
       const d = String(date.getDate()).padStart(2, "0");
       return `${y}-${m}-${d}`;
     }
+    function getAreaTitle(text) {
+      const rawText = String(text || "").trim();
+    
+      // 取前 4 個中文字，忽略空格、數字、符號
+      const chineseChars = rawText.match(/[\u4e00-\u9fff]/g);
+    
+      if (chineseChars && chineseChars.length >= 4) {
+        return chineseChars.slice(0, 4).join("");
+      }
+    
+      // 如果資料不足 4 個中文字，就退回取前 4 個字元
+      return rawText.slice(0, 4) || "紀錄檔";
+    }
+    function getBodyTextWithoutArea(text) {
+      const rawText = String(text || "").trim();
+    
+      let chineseCount = 0;
+      let cutIndex = 0;
+    
+      for (let i = 0; i < rawText.length; i++) {
+        if (/[\u4e00-\u9fff]/.test(rawText[i])) {
+          chineseCount++;
+        }
+    
+        if (chineseCount === 4) {
+          cutIndex = i + 1;
+          break;
+        }
+      }
+    
+      if (chineseCount >= 4) {
+        return rawText.slice(cutIndex).trim();
+      }
+    
+      return rawText;
+    }
 
     async function loadDataFromServer(callback) {
       if (!supabaseClient) {
@@ -805,7 +841,7 @@
 
       const title = document.createElement("div");
       title.className = "bb-title";
-      title.textContent = "紀錄檔 #" + cardNumber;
+      title.textContent = getAreaTitle(item.text);
       card.appendChild(title);
 
       if (item.imageUrl && item.imageUrl.trim() !== "") {
@@ -821,8 +857,9 @@
       }
 
       const body = document.createElement("div");
+      const body = document.createElement("div");
       body.className = "bb-body";
-      body.textContent = item.text;
+      body.textContent = getBodyTextWithoutArea(item.text);
       card.appendChild(body);
 
       const meta = document.createElement("div");
