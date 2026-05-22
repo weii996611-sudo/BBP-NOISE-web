@@ -41,6 +41,13 @@
       height: 100dvh;
       overflow: hidden;
     }
+    .btn-icon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      vertical-align: -3px;
+      margin-right: 6px;
+    }
 
     /* ---------------------------------------------------
        2. 頂部導覽列 (Header)
@@ -696,8 +703,12 @@
 
     <div class="header-actions">
       <button class="notify-header-btn" id="notify-header-btn" onclick="showNotifyModal(true)">🔔 接收通知</button>
-      <button class="back-btn" id="back-btn" onclick="showMenu()">← 返回</button>
-      <button class="refresh-btn" id="refresh-btn" onclick="refreshCurrentRegion()">🔄 刷新</button>
+      <button class="back-btn" id="back-btn" onclick="showMenu()">
+        <img src="https://sadnhsddereuhpfvdquk.supabase.co/storage/v1/object/sign/BBP%20LOGO/arrow-left.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8yNzI5Y2M5OC1mM2IzLTRhNGMtOTAzMC03M2M2MjZlNTM0NTIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCQlAgTE9HTy9hcnJvdy1sZWZ0LnBuZyIsImlhdCI6MTc3OTQxMzkyOCwiZXhwIjoxODc0MDIxOTI4fQ.rjPRdcZnsNTiPwAQj4gYE4Ou8WhuRyPwteOWFjWmmsU" class="btn-icon"> 返回
+      </button>
+      <button class="refresh-btn" id="refresh-btn" onclick="refreshCurrentRegion()">
+        <img src="https://sadnhsddereuhpfvdquk.supabase.co/storage/v1/object/sign/BBP%20LOGO/refresh.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8yNzI5Y2M5OC1mM2IzLTRhNGMtOTAzMC03M2M2MjZlNTM0NTIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCQlAgTE9HTy9yZWZyZXNoLnBuZyIsImlhdCI6MTc3OTQxNDAwMSwiZXhwIjoxNzc5NjczMjAxfQ.7pCDi5Poa8xJYW9yv0ArH9ttfgrzTLkdlt5N0W1TwK4" class="btn-icon"> 更新
+      </button>
     </div>
   </header>
 
@@ -1140,7 +1151,7 @@
       const shareBtn = document.createElement("button");
       shareBtn.className = "share-card-btn";
       shareBtn.type = "button";
-      shareBtn.textContent = "🔗 分享此紀錄";
+      shareBtn.innerHTML = '<img src="https://sadnhsddereuhpfvdquk.supabase.co/storage/v1/object/sign/BBP%20LOGO/share.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8yNzI5Y2M5OC1mM2IzLTRhNGMtOTAzMC03M2M2MjZlNTM0NTIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCQlAgTE9HTy9zaGFyZS5wbmciLCJpYXQiOjE3Nzk0MTQwNjcsImV4cCI6MTc3OTY3MzI2N30.YaM6IScWSo-RgYqP6ifJQHdU6x5hcq01hSRczGdVHjk" class="btn-icon"> 分享貼文';
       shareBtn.addEventListener("click", function () { shareCard(shareBtn, regionName, item.id); });
 
       const removeBtn = document.createElement("button");
@@ -1155,7 +1166,7 @@
         removeBtn.disabled = true;
         removeBtn.textContent = "✓ 已送出通報";
       } else {
-        removeBtn.textContent = "🛑 設備已撤離";
+        removeBtn.innerHTML = '<img src="https://sadnhsddereuhpfvdquk.supabase.co/storage/v1/object/sign/BBP%20LOGO/megaphone.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8yNzI5Y2M5OC1mM2IzLTRhNGMtOTAzMC03M2M2MjZlNTM0NTIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCQlAgTE9HTy9tZWdhcGhvbmUucG5nIiwiaWF0IjoxNzc5NDE0MzE0LCJleHAiOjE4NzQwMjIzMTR9.9ylETp7gvht4IHzujoi1a_6w3eJhZAB5W0X7YprgH9k" class="btn-icon"> 設備已撤離';
         removeBtn.addEventListener("click", function () { reportWithdraw(removeBtn, item.id); });
       }
 
@@ -1225,7 +1236,7 @@
       buttonObj.style.backgroundColor = "var(--tech-blue)";
 
       setTimeout(function () {
-        buttonObj.textContent = oldText || "🔗 分享此紀錄";
+        buttonObj.innerHTML = oldText || '<img src="https://sadnhsddereuhpfvdquk.supabase.co/storage/v1/object/sign/BBP%20LOGO/share.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8yNzI5Y2M5OC1mM2IzLTRhNGMtOTAzMC03M2M2MjZlNTM0NTIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCQlAgTE9HTy9zaGFyZS5wbmciLCJpYXQiOjE3Nzk0MTQwNjcsImV4cCI6MTc3OTY3MzI2N30.YaM6IScWSo-RgYqP6ifJQHdU6x5hcq01hSRczGdVHjk" class="btn-icon"> 分享圖卡';
         buttonObj.style.borderColor = "var(--tech-blue)";
         buttonObj.style.color = "var(--tech-blue)";
         buttonObj.style.backgroundColor = "transparent";
