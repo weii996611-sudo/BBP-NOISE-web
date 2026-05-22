@@ -194,6 +194,140 @@
       letter-spacing: 2px;
       color: var(--tech-white);
     }
+    .store-link-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 18px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .store-link {
+      min-width: 138px;
+      height: 44px;
+      border-radius: 10px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+      color: var(--tech-white);
+      border: 1px solid var(--tech-gray);
+      background: rgba(10, 10, 12, 0.95);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+      transition: all 0.2s ease;
+    }
+    
+    .store-link:hover {
+      transform: translateY(-2px);
+      border-color: var(--tech-blue);
+      box-shadow: 0 8px 24px var(--tech-blue-glow);
+    }
+    
+    .store-icon {
+      font-size: 1.45rem;
+      line-height: 1;
+    }
+    
+    .store-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+    }
+    
+    .store-small {
+      font-size: 0.58rem;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+    }
+    
+    .store-main {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--tech-white);
+    }
+    
+    .google-link .store-icon {
+      color: #34a853;
+    }
+    
+    .ios-link .store-icon {
+      color: var(--tech-white);
+    }
+    
+    .home-footer {
+      width: 100%;
+      max-width: 520px;
+      margin-top: 4px;
+      padding: 14px 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 13px;
+    }
+    
+    .follow-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--tech-white);
+      letter-spacing: 1px;
+    }
+    
+    .social-link-group {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      align-items: center;
+    }
+    
+    .social-link {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 1rem;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+      transition: transform 0.18s ease, opacity 0.18s ease;
+    }
+    
+    .social-link:hover {
+      transform: translateY(-2px) scale(1.04);
+    }
+    
+    .social-link.fb {
+      background: #1877f2;
+      font-size: 1.7rem;
+      font-family: Arial, sans-serif;
+    }
+    
+    .social-link.ig {
+      background: radial-gradient(circle at 30% 110%, #fdf497 0%, #fdf497 12%, #fd5949 38%, #d6249f 62%, #285aeb 100%);
+      font-size: 1.55rem;
+    }
+    
+    .social-link.threads {
+      background: #ffffff;
+      color: #000000;
+      font-size: 1.55rem;
+    }
+    
+    .social-link.line {
+      background: #06c755;
+      font-size: 0.68rem;
+      letter-spacing: -0.5px;
+    }
+    
+    .copyright {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
 
     /* 區域按鈕網格 */
     .region-grid {
@@ -623,7 +757,50 @@
         font-size: 0.85rem;
         letter-spacing: 1.5px;
       }
-      
+      .store-link-group {
+        gap: 10px;
+        margin-top: 16px;
+      }
+    
+      .store-link {
+        min-width: 128px;
+        height: 42px;
+        padding: 6px 10px;
+      }
+    
+      .store-icon {
+        font-size: 1.28rem;
+      }
+    
+      .store-small {
+        font-size: 0.52rem;
+      }
+    
+      .store-main {
+        font-size: 0.82rem;
+      }
+    
+      .home-footer {
+        padding-top: 6px;
+        gap: 11px;
+      }
+    
+      .follow-title {
+        font-size: 0.85rem;
+      }
+    
+      .social-link-group {
+        gap: 12px;
+      }
+    
+      .social-link {
+        width: 38px;
+        height: 38px;
+      }
+    
+      .copyright {
+        font-size: 0.7rem;
+      }
       #area-filter-bar {
         bottom: calc(18px + env(safe-area-inset-bottom));
         padding: 0 62px 10px 18px;
@@ -724,32 +901,64 @@
         </div>
         <div class="menu-badge">BBPATROL</div>
         <div class="menu-title">噪音偵測地點</div>
+    
+        <div class="store-link-group">
+          <a class="store-link ios-link" https://apps.apple.com/tw/app/bbpatrol%E9%BB%91%E7%AE%B1%E7%B3%BE%E5%AF%9F%E9%9A%8A/id6746429798 target="_blank" rel="noopener">
+            <span class="store-icon"></span>
+            <span class="store-text">
+              <span class="store-small">Download on the</span>
+              <span class="store-main">App Store</span>
+            </span>
+          </a>
+    
+          <a class="store-link google-link" https://play.google.com/store/apps/details?id=com.timer_swift&pli=1" target="_blank" rel="noopener">
+            <span class="store-icon">▶</span>
+            <span class="store-text">
+              <span class="store-small">GET IT ON</span>
+              <span class="store-main">Google Play</span>
+            </span>
+          </a>
+        </div>
       </div>
-
+    
       <div class="region-grid">
         <div class="region-btn" onclick="filterData('北北基')">
           <span class="region-name">北北基</span>
-          
         </div>
+    
         <div class="region-btn" onclick="filterData('桃竹苗')">
           <span class="region-name">桃竹苗</span>
-          
         </div>
+    
         <div class="region-btn" onclick="filterData('中彰投')">
           <span class="region-name">中彰投</span>
-          
         </div>
+    
         <div class="region-btn" onclick="filterData('雲嘉南')">
           <span class="region-name">雲嘉南</span>
-          
         </div>
+    
         <div class="region-btn" onclick="filterData('高屏')">
           <span class="region-name">高屏</span>
-          
         </div>
+    
         <div class="region-btn" onclick="filterData('宜花東')">
           <span class="region-name">宜花東</span>
-          
+        </div>
+      </div>
+    
+      <div class="home-footer">
+        <div class="follow-title">追蹤 BBpatrol 最新消息</div>
+    
+        <div class="social-link-group">
+          <a class="social-link fb" href="https://www.facebook.com/profile.php?id=61577787920069" target="_blank" rel="noopener">f</a>
+          <a class="social-link ig" href="https://www.instagram.com/bbpatrol.tw/" target="_blank" rel="noopener">◎</a>
+          <a class="social-link threads" href="https://www.threads.com/@bbpatrol.tw?xmt=AQF0thXHVYLjn3-qB104806dKL_u3DEXpTiDYphUWcuX1Q5oDRx5g6GWFtGuvHTIWd5CTh_tPQ" target="_blank" rel="noopener">@</a>
+          <a class="social-link line" href="https://lin.ee/zdmFhZb" target="_blank" rel="noopener">LINE</a>
+        </div>
+    
+        <div class="copyright">
+          © 2025 BBpatrol 黑箱糾察隊・保留所有權利
         </div>
       </div>
     </div>
