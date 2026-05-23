@@ -169,7 +169,70 @@
       border: 2px solid var(--tech-gray);
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
     }
-
+    .menu-logo-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .menu-logo-card {
+      cursor: pointer;
+      z-index: 2;
+      transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        filter 0.18s ease;
+    }
+    
+    .menu-logo-card:active {
+      transform: scale(0.94);
+      filter: brightness(0.92);
+    }
+    
+    .menu-logo-card.social-open {
+      box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.8),
+        0 0 22px rgba(26, 86, 219, 0.45);
+    }
+    
+    .menu-social-pop {
+      position: absolute;
+      right: calc(100% + 14px);
+      top: 50%;
+      transform: translateY(-50%) translateX(16px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      opacity: 0;
+      pointer-events: none;
+      transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+      z-index: 3;
+    }
+    
+    .menu-social-pop.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(-50%) translateX(0);
+    }
+    
+    .menu-social-pop .social-link {
+      width: 42px;
+      height: 42px;
+      box-shadow:
+        0 8px 18px rgba(0, 0, 0, 0.45),
+        0 0 12px rgba(26, 86, 219, 0.16);
+    }
+    
+    .menu-social-pop .social-link:hover {
+      transform: translateY(-2px) scale(1.08);
+    }
+    
+    .menu-social-pop .social-link:active {
+      transform: scale(0.9);
+    }
     .menu-logo {
       width: 100px;
       height: 100px;
@@ -885,6 +948,28 @@
       .menu-title {
         font-size: 1.3rem;
       }
+      .menu-social-pop {
+        right: calc(100% + 10px);
+        gap: 8px;
+      }
+      
+      .menu-social-pop .social-link {
+        width: 36px;
+        height: 36px;
+      }
+      
+      .menu-social-pop .social-link.fb {
+        font-size: 1.45rem;
+      }
+      
+      .menu-social-pop .social-link.ig,
+      .menu-social-pop .social-link.threads {
+        font-size: 1.35rem;
+      }
+      
+      .menu-social-pop .social-link.line {
+        font-size: 0.58rem;
+      }
     
       .store-link-group {
         position: absolute;
@@ -998,8 +1083,17 @@
   <main id="main-wrapper">
     <div id="menu-screen">
       <div class="menu-hero">
-        <div class="menu-logo-card">
-          <img src="LOGO2.png" alt="BBPATROL Logo" class="menu-logo">
+        <div class="menu-logo-wrap">
+          <div class="menu-social-pop" id="menu-social-pop">
+            <a class="social-link fb" href="https://www.facebook.com/profile.php?id=61577787920069" target="_blank" rel="noopener">f</a>
+            <a class="social-link ig" href="https://www.instagram.com/bbpatrol.tw/" target="_blank" rel="noopener">◎</a>
+            <a class="social-link threads" href="https://www.threads.com/@bbpatrol.tw?xmt=AQF0thXHVYLjn3-qB104806dKL_u3DEXpTiDYphUWcuX1Q5oDRx5g6GWFtGuvHTIWd5CTh_tPQ" target="_blank" rel="noopener">@</a>
+            <a class="social-link line" href="https://lin.ee/zdmFhZb" target="_blank" rel="noopener">LINE</a>
+          </div>
+        
+          <div class="menu-logo-card" onclick="toggleMenuSocial(event)">
+            <img src="LOGO2.png" alt="BBPATROL Logo" class="menu-logo">
+          </div>
         </div>
         <div class="menu-title">噪音偵測地點</div>
     
@@ -1154,6 +1248,30 @@
     
       window.history.replaceState({ page: "home" }, "", cleanUrl);
     }
+    function toggleMenuSocial(event) {
+      if (event) event.stopPropagation();
+    
+      const pop = document.getElementById("menu-social-pop");
+      const logoCard = document.querySelector(".menu-logo-card");
+    
+      if (!pop || !logoCard) return;
+    
+      const isOpen = pop.classList.toggle("show");
+      logoCard.classList.toggle("social-open", isOpen);
+    }
+    
+    document.addEventListener("click", function (event) {
+      const pop = document.getElementById("menu-social-pop");
+      const logoWrap = document.querySelector(".menu-logo-wrap");
+      const logoCard = document.querySelector(".menu-logo-card");
+    
+      if (!pop || !logoWrap || !logoCard) return;
+    
+      if (!logoWrap.contains(event.target)) {
+        pop.classList.remove("show");
+        logoCard.classList.remove("social-open");
+      }
+    });
     
     function goBackToMenu() {
       goHome();
