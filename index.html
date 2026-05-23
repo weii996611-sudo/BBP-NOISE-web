@@ -1670,24 +1670,31 @@
     async function shareCard(buttonObj, region, reportId) {
       const baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
       const shareUrl = baseUrl + "?region=" + encodeURIComponent(region) + "&id=" + encodeURIComponent(reportId);
-
+    
+      const shareText = "快來看這裡新增的噪音偵測吧!";
+      const fullShareText = shareText + "\n" + shareUrl;
+    
       try {
         if (navigator.share) {
-          await navigator.share({ title: "BBPATROL 系統紀錄", text: "查閱此偵測紀錄", url: shareUrl });
+          await navigator.share({
+            text: shareText,
+            url: shareUrl
+          });
           return;
         }
-        await navigator.clipboard.writeText(shareUrl);
+    
+        await navigator.clipboard.writeText(fullShareText);
         showShareSuccess(buttonObj);
+    
       } catch (error) {
         try {
-          await navigator.clipboard.writeText(shareUrl);
+          await navigator.clipboard.writeText(fullShareText);
           showShareSuccess(buttonObj);
         } catch (copyError) {
           alert("連結複製失敗。");
         }
       }
     }
-
     // 狀態顏色修改為對應的科技藍
     function showShareSuccess(buttonObj) {
       const oldText = buttonObj.textContent;
