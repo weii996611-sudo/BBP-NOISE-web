@@ -781,26 +781,9 @@
         font-size: 1.2rem;
       }
     
-     .brand-subtitle {
+      .brand-subtitle {
         font-size: 0.85rem;
         letter-spacing: 1.5px;
-      }
-     .store-link {
-        min-width: 128px;
-        height: 42px;
-        padding: 6px 10px;
-      }
-    
-      .store-icon {
-        font-size: 1.28rem;
-      }
-    
-      .store-small {
-        font-size: 0.52rem;
-      }
-    
-      .store-main {
-        font-size: 0.82rem;
       }
     
       .home-footer {
@@ -824,17 +807,18 @@
       .copyright {
         font-size: 0.7rem;
       }
+    
       #area-filter-bar {
         bottom: calc(18px + env(safe-area-inset-bottom));
         padding: 0 62px 10px 18px;
         scroll-padding-right: 62px;
       }
-      
+    
       #area-filter-bar::after {
         bottom: calc(18px + env(safe-area-inset-bottom));
         width: 56px;
       }
-      
+    
       .area-filter-btn {
         padding: 8px 14px;
         font-size: 0.86rem;
@@ -844,11 +828,12 @@
         justify-content: flex-start;
         padding-top: 42px;
         padding-bottom: calc(110px + env(safe-area-inset-bottom));
-        gap: 20px;
+        gap: 18px;
       }
     
       .menu-hero {
-        margin-bottom: 4px;
+        position: relative;
+        margin-bottom: 0;
       }
     
       .menu-logo-card {
@@ -864,6 +849,58 @@
     
       .menu-title {
         font-size: 1.3rem;
+      }
+    
+      .store-link-group {
+        position: absolute;
+        top: 0;
+        right: -62px;
+        width: 44px;
+        height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0;
+        margin-top: 0;
+        flex-wrap: nowrap;
+      }
+    
+      .store-link {
+        width: 42px;
+        height: 42px;
+        min-width: 0;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        overflow: visible;
+        text-decoration: none;
+        background: transparent;
+        border: none;
+        padding: 0;
+        transition:
+          transform 0.18s ease,
+          filter 0.18s ease,
+          box-shadow 0.18s ease;
+      }
+    
+      .store-link img {
+        width: 42px;
+        height: 42px;
+        object-fit: contain;
+        display: block;
+      }
+    
+      .store-link:hover {
+        transform: translateY(-2px) scale(1.08);
+        filter: brightness(1.16);
+        box-shadow: 0 0 10px rgba(26, 86, 219, 0.28);
+      }
+    
+      .store-link:active {
+        transform: scale(0.9);
+        filter: brightness(0.9);
       }
     
       .region-grid {
@@ -894,57 +931,6 @@
       .bb-title {
         font-size: 1.85rem;
         letter-spacing: 1.5px;
-      }
-      .store-link-group {
-        position: absolute;
-        top: 0;
-        right: -66px;
-        width: 52px;
-        height: 120px;
-        flex-direction: column;
-        justify-content: space-between;
-        gap: 0;
-        margin-top: 0;
-      }
-      
-      .store-link {
-        width: 52px;
-        height: 52px;
-        border-radius: 14px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        overflow: visible;
-        text-decoration: none;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        padding: 0;
-        transition:
-          transform 0.18s ease,
-          filter 0.18s ease,
-          box-shadow 0.18s ease,
-          background 0.18s ease;
-      }
-      
-      .store-link img {
-        width: 44px;
-        height: 44px;
-        object-fit: contain;
-        display: block;
-      }
-      .store-link:hover {
-        transform: translateY(-2px) scale(1.08);
-        background: rgba(255, 255, 255, 0.1);
-        box-shadow:
-          0 0 0 1px rgba(255, 255, 255, 0.18),
-          0 8px 20px rgba(0, 0, 0, 0.45),
-          0 0 18px rgba(26, 86, 219, 0.25);
-        filter: brightness(1.12);
-      }
-      
-      .store-link:active {
-        transform: scale(0.92);
-        filter: brightness(0.9);
       }
     }
   </style>
