@@ -1104,7 +1104,7 @@
       const id = params.get("id");
 
       if (region && REGION_LIST.includes(region)) {
-        filterData(region);
+        filterData(region, "", true);
         if (id) {
           setTimeout(function () { scrollToCard(id); }, 300);
         }
@@ -1420,9 +1420,14 @@
         window.location.pathname +
         "?region=" +
         encodeURIComponent(regionName);
-      
+    
       if (!fromPopState) {
-        window.history.pushState({ page: "region", region: regionName }, "", cleanUrl);
+        window.history.pushState(
+          { page: "region", region: regionName },
+          "",
+          cleanUrl
+        );
+      }
     
       showNotifyPromptAfterRegionClick();
     }
