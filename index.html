@@ -549,6 +549,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+      touch-action: pan-y;
+      user-select: none;
     }
 
     .image-container img {
@@ -1411,33 +1414,72 @@
       
           function updateCarouselImage() {
             img.src = images[currentImageIndex];
-      
+          
             dotElements.forEach(function (dot, index) {
               dot.className = "image-dot" + (index === currentImageIndex ? " active" : "");
             });
           }
-      
-          leftBtn.addEventListener("click", function (event) {
-            event.stopPropagation();
-      
+          
+          function showPrevImage() {
             currentImageIndex =
               currentImageIndex === 0
                 ? images.length - 1
                 : currentImageIndex - 1;
-      
+          
             updateCarouselImage();
-          });
-      
-          rightBtn.addEventListener("click", function (event) {
-            event.stopPropagation();
-      
+          }
+          
+          function showNextImage() {
             currentImageIndex =
               currentImageIndex === images.length - 1
                 ? 0
                 : currentImageIndex + 1;
-      
+          
             updateCarouselImage();
+          }
+          
+          leftBtn.addEventListener("click", function (event) {
+            event.stopPropagation();
+            showPrevImage();
           });
+          
+          rightBtn.addEventListener("click", function (event) {
+            event.stopPropagation();
+            showNextImage();
+          });
+          
+          let touchStartX = 0;
+          let touchStartY = 0;
+          let touchEndX = 0;
+          let touchEndY = 0;
+          
+          imageContainer.addEventListener("touchstart", function (event) {
+            if (!event.touches || event.touches.length === 0) return;
+          
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+          }, { passive: true });
+          
+          imageContainer.addEventListener("touchend", function (event) {
+            if (!event.changedTouches || event.changedTouches.length === 0) return;
+          
+            touchEndX = event.changedTouches[0].clientX;
+            touchEndY = event.changedTouches[0].clientY;
+          
+            const diffX = touchEndX - touchStartX;
+            const diffY = touchEndY - touchStartY;
+          
+            // 避免上下滑頁面時誤觸，必須是明顯左右滑才切圖
+            if (Math.abs(diffX) < 45 || Math.abs(diffX) < Math.abs(diffY)) {
+              return;
+            }
+          
+            if (diffX > 0) {
+              showPrevImage();
+            } else {
+              showNextImage();
+            }
+          }, { passive: true });
       
           imageContainer.appendChild(leftBtn);
           imageContainer.appendChild(rightBtn);
