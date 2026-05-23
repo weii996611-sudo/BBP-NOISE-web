@@ -69,6 +69,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      cursor: pointer;
+      user-select: none;
     }
 
     .brand-title {
@@ -713,6 +715,18 @@
       transform: translateY(-50%);
       letter-spacing: 1px;
     }
+    
+    #no-data {
+      cursor: pointer;
+    }
+    
+    .no-data-home {
+      display: inline-block;
+      margin-top: 10px;
+      color: var(--tech-blue);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
 
     .error-text { color: var(--tech-red) !important; }
 
@@ -963,7 +977,7 @@
 
 <body>
   <header id="header">
-    <div class="brand-group">
+    <div class="brand-group" onclick="goHome()" title="回首頁">
       <div class="brand-title">BBPATROL</div>
       <div class="brand-subtitle">黑箱糾察隊</div>
     </div>
@@ -1043,7 +1057,10 @@
     <div id="data-screen"></div>
     <div id="area-filter-bar" style="display: none;"></div>
     <div id="loading-text" style="display: none;">[ 系統連線中... ]</div>
-    <div id="no-data" style="display: none;">該區域暫無回報紀錄</div>
+    <div id="no-data" style="display: none;" onclick="goHome()">
+      該區域暫無回報紀錄<br>
+      <span class="no-data-home">點此返回首頁</span>
+    </div>
 
     <div id="notify-modal" class="notify-modal" style="display: none;">
       <div class="notify-box">
@@ -1124,12 +1141,20 @@
     
       isHandlingPopState = false;
     });
-　　function goBackToMenu() {
-      if (currentRegion) {
-        history.back();
-      } else {
-        showMenu();
-      }
+　　function goHome() {
+      showMenu(true);
+    
+      const cleanUrl =
+        window.location.protocol +
+        "//" +
+        window.location.host +
+        window.location.pathname;
+    
+      window.history.replaceState({ page: "home" }, "", cleanUrl);
+    }
+    
+    function goBackToMenu() {
+      goHome();
     }
     function showLoading(text) {
       const loadingText = document.getElementById("loading-text");
@@ -1623,7 +1648,7 @@
         window.location.pathname;
       
       if (!fromPopState) {
-        window.history.pushState({ page: "home" }, "", cleanUrl);
+        window.history.replaceState({ page: "home" }, "", cleanUrl);
       }
     }
 
