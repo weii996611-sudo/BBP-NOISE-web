@@ -137,7 +137,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 32px;
+      gap: 22px;
       padding: 20px;
       height: 100%;
       overflow-y: auto;
@@ -842,8 +842,9 @@
     
       #menu-screen {
         justify-content: flex-start;
-        padding-top: 48px;
+        padding-top: 42px;
         padding-bottom: calc(110px + env(safe-area-inset-bottom));
+        gap: 20px;
       }
     
       .menu-hero {
@@ -853,7 +854,7 @@
       .menu-logo-card {
         width: 120px;
         height: 120px;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
       }
     
       .menu-logo {
@@ -896,21 +897,54 @@
       }
       .store-link-group {
         position: absolute;
-        top: 18px;
-        right: -72px;
+        top: 0;
+        right: -66px;
+        width: 52px;
+        height: 120px;
         flex-direction: column;
-        gap: 10px;
+        justify-content: space-between;
+        gap: 0;
         margin-top: 0;
       }
       
       .store-link {
-        width: 54px;
-        height: 54px;
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        overflow: visible;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 0;
+        transition:
+          transform 0.18s ease,
+          filter 0.18s ease,
+          box-shadow 0.18s ease,
+          background 0.18s ease;
       }
       
       .store-link img {
-        width: 46px;
-        height: 46px;
+        width: 44px;
+        height: 44px;
+        object-fit: contain;
+        display: block;
+      }
+      .store-link:hover {
+        transform: translateY(-2px) scale(1.08);
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.18),
+          0 8px 20px rgba(0, 0, 0, 0.45),
+          0 0 18px rgba(26, 86, 219, 0.25);
+        filter: brightness(1.12);
+      }
+      
+      .store-link:active {
+        transform: scale(0.92);
+        filter: brightness(0.9);
       }
     }
   </style>
@@ -940,7 +974,6 @@
         <div class="menu-logo-card">
           <img src="LOGO2.png" alt="BBPATROL Logo" class="menu-logo">
         </div>
-        <div class="menu-badge">BBPATROL</div>
         <div class="menu-title">噪音偵測地點</div>
     
         <div class="store-link-group">
