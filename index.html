@@ -970,7 +970,7 @@
 
     <div class="header-actions">
       <button class="notify-header-btn" id="notify-header-btn" onclick="showNotifyModal(true)">🔔 接收通知</button>
-      <button class="back-btn" id="back-btn" onclick="showMenu()">
+      <button class="back-btn" id="back-btn" onclick="goBackToMenu()">
         <img src="https://sadnhsddereuhpfvdquk.supabase.co/storage/v1/object/sign/BBP%20LOGO/undo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8yNzI5Y2M5OC1mM2IzLTRhNGMtOTAzMC03M2M2MjZlNTM0NTIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCQlAgTE9HTy91bmRvLnBuZyIsImlhdCI6MTc3OTQxNTQzMCwiZXhwIjoxODc0MDIzNDMwfQ.B8kpcetL_P-vhvMZJpogz1JeaONfOUYr8Rm0xSCqx-8" class="btn-icon"> 返回
       </button>
       <button class="refresh-btn" id="refresh-btn" onclick="refreshCurrentRegion()">
@@ -1074,6 +1074,7 @@
     let currentRegion = "";
     let currentAreaFilter = "";
     let supabaseClient = null;
+    let isHandlingPopState = false;
     let notifyPromptTimer = null;
     let notifyPromptShownThisSession = false;
 
@@ -1109,7 +1110,27 @@
         }
       }
     });
-
+    window.addEventListener("popstate", function () {
+      const params = new URLSearchParams(window.location.search);
+      const region = params.get("region");
+    
+      isHandlingPopState = true;
+    
+      if (region && REGION_LIST.includes(region)) {
+        filterData(region, "", true);
+      } else {
+        showMenu(true);
+      }
+    
+      isHandlingPopState = false;
+    });
+　　function goBackToMenu() {
+      if (currentRegion) {
+        history.back();
+      } else {
+        showMenu();
+      }
+    }
     function showLoading(text) {
       const loadingText = document.getElementById("loading-text");
       loadingText.classList.remove("error-text");
@@ -1353,7 +1374,7 @@
       }
     }
 
-    function filterData(regionName, areaFilter = "") {
+    function filterData(regionName, areaFilter = "", fromPopState = false) {
       currentRegion = regionName;
       currentAreaFilter = areaFilter;
     
@@ -1399,8 +1420,9 @@
         window.location.pathname +
         "?region=" +
         encodeURIComponent(regionName);
-    
-      window.history.replaceState({}, "", cleanUrl);
+      
+      if (!fromPopState) {
+        window.history.pushState({ page: "region", region: regionName }, "", cleanUrl);
     
       showNotifyPromptAfterRegionClick();
     }
@@ -1577,7 +1599,7 @@
       return card;
     }
 
-    function showMenu() {
+    function showMenu(fromPopState = false) {
       currentRegion = "";
       document.getElementById("menu-screen").style.display = "flex";
       document.getElementById("data-screen").style.display = "none";
@@ -1589,8 +1611,15 @@
         areaFilterBar.style.display = "none";
       }
       hideLoading();
-      const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-      window.history.replaceState({}, "", cleanUrl);
+      const cleanUrl =
+        window.location.protocol +
+        "//" +
+        window.location.host +
+        window.location.pathname;
+      
+      if (!fromPopState) {
+        window.history.pushState({ page: "home" }, "", cleanUrl);
+      }
     }
 
     async function refreshCurrentRegion() {
