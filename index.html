@@ -557,7 +557,58 @@
       object-fit: cover; /* 改為 cover 讓地圖填滿更俐落 */
       display: block;
     }
-
+    .image-container {
+      position: relative;
+    }
+    
+    .image-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(0, 0, 0, 0.55);
+      color: #ffffff;
+      font-size: 1.2rem;
+      font-weight: 900;
+      cursor: pointer;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .image-nav-btn.left {
+      left: 8px;
+    }
+    
+    .image-nav-btn.right {
+      right: 8px;
+    }
+    
+    .image-dots {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 8px;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      z-index: 3;
+    }
+    
+    .image-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.45);
+    }
+    
+    .image-dot.active {
+      background: #ffffff;
+    }
     .bb-body {
       font-size: 1rem;
       line-height: 1.5;
@@ -1236,7 +1287,6 @@
             id: item.id,
             text: item.text || "",
             imageUrl: item.image_url || "",
-            imageUrls: Array.isArray(item.image_urls) ? item.image_urls : [],
             imageUrls: Array.isArray(item.image_urls) && item.image_urls.length > 0
               ? item.image_urls
               : (item.image_url ? [item.image_url] : []),
@@ -1331,11 +1381,69 @@
         img.src = images[currentImageIndex];
         img.alt = "系統快照";
         img.loading = "lazy";
+      
         img.onerror = function () {
           imageContainer.style.display = "none";
         };
       
         imageContainer.appendChild(img);
+      
+        if (images.length > 1) {
+          const leftBtn = document.createElement("button");
+          leftBtn.className = "image-nav-btn left";
+          leftBtn.type = "button";
+          leftBtn.textContent = "‹";
+      
+          const rightBtn = document.createElement("button");
+          rightBtn.className = "image-nav-btn right";
+          rightBtn.type = "button";
+          rightBtn.textContent = "›";
+      
+          const dots = document.createElement("div");
+          dots.className = "image-dots";
+      
+          const dotElements = images.map(function (_, index) {
+            const dot = document.createElement("span");
+            dot.className = "image-dot" + (index === 0 ? " active" : "");
+            dots.appendChild(dot);
+            return dot;
+          });
+      
+          function updateCarouselImage() {
+            img.src = images[currentImageIndex];
+      
+            dotElements.forEach(function (dot, index) {
+              dot.className = "image-dot" + (index === currentImageIndex ? " active" : "");
+            });
+          }
+      
+          leftBtn.addEventListener("click", function (event) {
+            event.stopPropagation();
+      
+            currentImageIndex =
+              currentImageIndex === 0
+                ? images.length - 1
+                : currentImageIndex - 1;
+      
+            updateCarouselImage();
+          });
+      
+          rightBtn.addEventListener("click", function (event) {
+            event.stopPropagation();
+      
+            currentImageIndex =
+              currentImageIndex === images.length - 1
+                ? 0
+                : currentImageIndex + 1;
+      
+            updateCarouselImage();
+          });
+      
+          imageContainer.appendChild(leftBtn);
+          imageContainer.appendChild(rightBtn);
+          imageContainer.appendChild(dots);
+        }
+      
         card.appendChild(imageContainer);
       }
 
